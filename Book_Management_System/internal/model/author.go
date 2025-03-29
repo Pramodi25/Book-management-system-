@@ -8,13 +8,13 @@ import (
 type AuthorRequest struct {
 	AuthorID uuid.UUID `json:"authorId" validate:"required"`
 	Name     string    `json:"name" validate:"required"`
-	Bio      string    `json:"biography" validate:"required"`
+	Bio      string    `json:"bio" validate:"required"`
 }
 
 type AuthorResponse struct {
 	AuthorID uuid.UUID `json:"authorId"`
 	Name     string    `json:"name"`
-	Bio      string    `json:"biography"`
+	Bio      string    `json:"bio"`
 }
 
 func AuthorResponseFromDB(Author *db.Author) *AuthorResponse {

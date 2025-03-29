@@ -15,6 +15,12 @@ type PublisherService struct {
 	q PublisherDBServiceProvider
 }
 
+func NewPublisherService(publisherDBServiceProvider PublisherDBServiceProvider) *PublisherService {
+	return &PublisherService{
+		q: publisherDBServiceProvider,
+	}
+}
+
 func (s *PublisherService) CreatePublisher(ctx context.Context, req model.PublisherRequest) (*model.PublisherResponse, error) {
 	dbReq, err := toCreatePublisherParams(req)
 	if err != nil {

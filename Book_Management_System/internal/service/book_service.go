@@ -3,6 +3,7 @@ package service
 import (
 	"context"
 	"database/sql"
+	"errors"
 	"fmt"
 	"time"
 
@@ -17,6 +18,8 @@ type BookDBServiceProvider interface {
 	GetAllBooks(ctx context.Context) ([]db.Book, error)
 	GetBookByID(ctx context.Context, bookID uuid.UUID) (db.Book, error)
 	UpdateBook(ctx context.Context, arg db.UpdateBookParams) (db.Book, error)
+	GetAuthorByID(ctx context.Context, authorID uuid.UUID) (db.Author, error)
+	GetPublisherByID(ctx context.Context, publisherID uuid.UUID) (db.Publisher, error)
 }
 
 type BookService struct {
@@ -35,6 +38,22 @@ func (s *BookService) CreateBook(ctx context.Context, req model.BookRequest) (*m
 		return nil, err
 	}
 
+	_, err = s.q.GetAuthorByID(ctx, params.AuthorID)
+	if err != nil {
+		if errors.Is(err, sql.ErrNoRows) {
+			return nil, errors.New("not valid Author ID")
+		}
+		return nil, err
+	}
+
+	_, err = s.q.GetPublisherByID(ctx, params.PublisherID)
+	if err != nil {
+		if errors.Is(err, sql.ErrNoRows) {
+			return nil, errors.New("not valid Publisher ID")
+		}
+		return nil, err
+	}
+
 	book, err := s.q.CreateBook(ctx, params)
 	if err != nil {
 		return nil, err
@@ -48,7 +67,7 @@ func (s *BookService) GetAllBooks(ctx context.Context) ([]*model.BookResponse, e
 	if err != nil {
 		return nil, err
 	}
-	var res []*model.BookResponse
+	res := []*model.BookResponse{}
 	for _, b := range books {
 		bookResponse := model.BookResponseFromDB(b)
 		res = append(res, &bookResponse)
@@ -68,6 +87,22 @@ func (s *BookService) GetBookByID(ctx context.Context, id uuid.UUID) (*model.Boo
 func (s *BookService) UpdateBook(ctx context.Context, id uuid.UUID, req model.BookRequest) (*model.BookResponse, error) {
 	params, err := toUpdateBookParams(id, req)
 	if err != nil {
+		return nil, err
+	}
+
+	_, err = s.q.GetAuthorByID(ctx, params.AuthorID)
+	if err != nil {
+		if errors.Is(err, sql.ErrNoRows) {
+			return nil, errors.New("not valid Author ID")
+		}
+		return nil, err
+	}
+
+	_, err = s.q.GetPublisherByID(ctx, params.PublisherID)
+	if err != nil {
+		if errors.Is(err, sql.ErrNoRows) {
+			return nil, errors.New("not valid Publisher ID")
+		}
 		return nil, err
 	}
 

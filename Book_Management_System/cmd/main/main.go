@@ -12,6 +12,7 @@ import (
 	"book_management_system/internal/handler"
 	"book_management_system/internal/service"
 	"github.com/go-chi/chi/v5"
+	_ "github.com/lib/pq"
 )
 
 func main() {
@@ -30,7 +31,9 @@ func main() {
 	bookService := service.NewBookService(queries)
 	bookHandler := handler.NewBookHandler(bookService)
 	authorService := service.NewAuthorService(queries)
-	authorHandler := handler.NewAuthorHandler(bookService)
+	authorHandler := handler.NewAuthorHandler(authorService)
+	publisherService := service.NewPublisherService(queries)
+	publisherHandler := handler.NewPublisherHandler(publisherService)
 
 	r := chi.NewRouter()
 	r.Get("/status", handler.StatusHandler(conn))
@@ -43,8 +46,8 @@ func main() {
 		r.Delete("/{id}", bookHandler.Delete)
 	})
 
-	r.Post("/authors")
-	r.Post("/publishers")
+	r.Post("/authors", authorHandler.Create)
+	r.Post("/publishers", publisherHandler.Create)
 
 	addr := fmt.Sprintf(":%d", config.AppConfig.Server.Port)
 	log.Printf("🚀 Server started at %s", addr)

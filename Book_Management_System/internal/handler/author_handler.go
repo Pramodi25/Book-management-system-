@@ -11,8 +11,8 @@ type AuthorHandler struct {
 	svc service_interface.AuthorService
 }
 
-func NewAuthorHandler(svc service_interface.PublisherService) *PublisherHandler {
-	return &PublisherHandler{svc: svc}
+func NewAuthorHandler(svc service_interface.AuthorService) *AuthorHandler {
+	return &AuthorHandler{svc: svc}
 }
 
 func (h *AuthorHandler) Create(w http.ResponseWriter, r *http.Request) {

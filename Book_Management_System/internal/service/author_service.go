@@ -15,6 +15,12 @@ type AuthorService struct {
 	q AuthorDBServiceProvider
 }
 
+func NewAuthorService(authorDBServiceProvider AuthorDBServiceProvider) *AuthorService {
+	return &AuthorService{
+		q: authorDBServiceProvider,
+	}
+}
+
 func (s *AuthorService) CreateAuthor(ctx context.Context, req model.AuthorRequest) (*model.AuthorResponse, error) {
 	dbReq, err := toCreateAuthorParams(req)
 	if err != nil {

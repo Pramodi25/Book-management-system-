@@ -16,7 +16,7 @@ func NewPublisherHandler(svc service_interface.PublisherService) *PublisherHandl
 }
 
 func (h *PublisherHandler) Create(w http.ResponseWriter, r *http.Request) {
-	var req model.BookRequest
+	var req model.PublisherRequest
 	if err := json.NewDecoder(r.Body).Decode(&req); err != nil {
 		writeError(w, http.StatusBadRequest, "Invalid JSON body")
 		return

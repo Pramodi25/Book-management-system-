@@ -43,8 +43,14 @@ INSERT INTO authors (author_id, name, bio)
 VALUES ($1, $2, $3)
     RETURNING *;
 
+-- name: GetAuthorByID :one
+SELECT * FROM authors WHERE author_id  = $1;
+
 -- PUBLISHERS
 -- name: CreatePublisher :one
 INSERT INTO publishers (publisher_id, name, address)
 VALUES ($1, $2, $3)
     RETURNING *;
+
+-- name: GetPublisherByID :one
+SELECT * FROM publishers WHERE publisher_id = $1;

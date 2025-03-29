@@ -195,6 +195,53 @@ func (q *Queries) GetBookByID(ctx context.Context, bookID uuid.UUID) (Book, erro
 	return i, err
 }
 
+const getBooksPaginated = `-- name: GetBooksPaginated :many
+SELECT book_id, author_id, publisher_id, title, publication_date, isbn, pages, genre, description, price, quantity
+FROM books
+ORDER BY title
+    LIMIT $1 OFFSET $2
+`
+
+type GetBooksPaginatedParams struct {
+	Limit  int32
+	Offset int32
+}
+
+func (q *Queries) GetBooksPaginated(ctx context.Context, arg GetBooksPaginatedParams) ([]Book, error) {
+	rows, err := q.db.QueryContext(ctx, getBooksPaginated, arg.Limit, arg.Offset)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+	var items []Book
+	for rows.Next() {
+		var i Book
+		if err := rows.Scan(
+			&i.BookID,
+			&i.AuthorID,
+			&i.PublisherID,
+			&i.Title,
+			&i.PublicationDate,
+			&i.Isbn,
+			&i.Pages,
+			&i.Genre,
+			&i.Description,
+			&i.Price,
+			&i.Quantity,
+		); err != nil {
+			return nil, err
+		}
+		items = append(items, i)
+	}
+	if err := rows.Close(); err != nil {
+		return nil, err
+	}
+	if err := rows.Err(); err != nil {
+		return nil, err
+	}
+	return items, nil
+}
+
 const getPublisherByID = `-- name: GetPublisherByID :one
 SELECT publisher_id, name, address FROM publishers WHERE publisher_id = $1
 `

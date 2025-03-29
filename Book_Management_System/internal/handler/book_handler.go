@@ -5,6 +5,7 @@ import (
 	"book_management_system/internal/service_interface"
 	"encoding/json"
 	"net/http"
+	"strconv"
 
 	"github.com/go-chi/chi/v5"
 	"github.com/go-playground/validator/v10"
@@ -59,7 +60,38 @@ func (h *BookHandler) Delete(w http.ResponseWriter, r *http.Request) {
 }
 
 func (h *BookHandler) GetAll(w http.ResponseWriter, r *http.Request) {
-	res, err := h.svc.GetAllBooks(r.Context())
+	query := r.URL.Query()
+
+	var limit *int32
+	var offset *int32
+
+	// Optional limit
+	if limitStr := query.Get("limit"); limitStr != "" {
+		if l, err := strconv.Atoi(limitStr); err == nil && l > 0 {
+			val := int32(l)
+			limit = &val
+		} else {
+			writeError(w, http.StatusBadRequest, "Invalid 'limit' parameter")
+			return
+		}
+	}
+
+	// Optional page → converted to offset
+	if pageStr := query.Get("page"); pageStr != "" {
+		if p, err := strconv.Atoi(pageStr); err == nil && p > 0 {
+			if limit == nil {
+				writeError(w, http.StatusBadRequest, "'limit' must be set if 'page' is provided")
+				return
+			}
+			val := int32((p - 1) * int(*limit))
+			offset = &val
+		} else {
+			writeError(w, http.StatusBadRequest, "Invalid 'page' parameter")
+			return
+		}
+	}
+
+	res, err := h.svc.GetAllBooks(r.Context(), limit, offset)
 	if err != nil {
 		writeError(w, http.StatusInternalServerError, "Failed to fetch books: "+err.Error())
 		return

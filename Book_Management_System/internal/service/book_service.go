@@ -21,6 +21,7 @@ type BookDBServiceProvider interface {
 	GetAuthorByID(ctx context.Context, authorID uuid.UUID) (db.Author, error)
 	GetPublisherByID(ctx context.Context, publisherID uuid.UUID) (db.Publisher, error)
 	SearchBooks(ctx context.Context, keyword sql.NullString) ([]db.Book, error)
+	GetBooksPaginated(ctx context.Context, arg db.GetBooksPaginatedParams) ([]db.Book, error)
 }
 
 type BookService struct {
@@ -63,7 +64,24 @@ func (s *BookService) CreateBook(ctx context.Context, req model.BookRequest) (*m
 	return &bookResponse, nil
 }
 
-func (s *BookService) GetAllBooks(ctx context.Context) ([]*model.BookResponse, error) {
+func (s *BookService) GetAllBooks(ctx context.Context, offset *int32, limit *int32) (*model.GetBooksResponse, error) {
+	if offset != nil && limit != nil {
+		books, err := s.q.GetBooksPaginated(ctx, db.GetBooksPaginatedParams{
+			Limit:  *limit,
+			Offset: *offset,
+		})
+		if err != nil {
+			return nil, err
+		}
+		res := []*model.BookResponse{}
+		for _, b := range books {
+			bookResponse := model.BookResponseFromDB(b)
+			res = append(res, &bookResponse)
+		}
+		return &model.GetBooksResponse{
+			Books: res,
+		}, nil
+	}
 	books, err := s.q.GetAllBooks(ctx)
 	if err != nil {
 		return nil, err
@@ -73,7 +91,9 @@ func (s *BookService) GetAllBooks(ctx context.Context) ([]*model.BookResponse, e
 		bookResponse := model.BookResponseFromDB(b)
 		res = append(res, &bookResponse)
 	}
-	return res, nil
+	return &model.GetBooksResponse{
+		Books: res,
+	}, nil
 }
 
 func (s *BookService) GetBookByID(ctx context.Context, id uuid.UUID) (*model.BookResponse, error) {
@@ -116,7 +136,7 @@ func (s *BookService) UpdateBook(ctx context.Context, id uuid.UUID, req model.Bo
 	return &bookResponse, nil
 }
 
-func (s *BookService) SearchBooks(ctx context.Context, keyword string) ([]*model.BookResponse, error) {
+func (s *BookService) SearchBooks(ctx context.Context, keyword string, pageNumber *int32, limit *int32) ([]*model.BookResponse, error) {
 	if keyword == "" {
 		return nil, fmt.Errorf("keyword cannot be empty")
 	}

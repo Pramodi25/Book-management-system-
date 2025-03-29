@@ -59,3 +59,10 @@ SELECT * FROM publishers WHERE publisher_id = $1;
 SELECT book_id, author_id, publisher_id, title, publication_date, isbn, pages, genre, description, price, quantity
 FROM books
 WHERE LOWER(title) LIKE LOWER('%' || $1 || '%') OR LOWER(description) LIKE LOWER('%' || $1 || '%');
+
+-- name: GetBooksPaginated :many
+SELECT book_id, author_id, publisher_id, title, publication_date, isbn, pages, genre, description, price, quantity
+FROM books
+ORDER BY title
+    LIMIT $1 OFFSET $2;
+

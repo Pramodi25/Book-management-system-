@@ -20,6 +20,13 @@ type BookRequest struct {
 	Quantity        int32     `json:"quantity" validate:"required,gte=0"`
 }
 
+type GetBooksResponse struct {
+	Total      *int32          `json:"total,omitempty"`
+	PageNumber *int32          `json:"pageNumber,omitempty"`
+	PageSize   *int32          `json:"pageSize,omitempty"`
+	Books      []*BookResponse `json:"books"`
+}
+
 type BookResponse struct {
 	BookID          uuid.UUID `json:"bookId"`
 	AuthorID        uuid.UUID `json:"authorId"`

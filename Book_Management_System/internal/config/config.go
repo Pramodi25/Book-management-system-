@@ -40,9 +40,20 @@ func Init() error {
 }
 
 func GetDBSource() string {
-	db := AppConfig.Database
 	return fmt.Sprintf(
 		"postgres://%s:%s@%s:%d/%s?sslmode=%s",
-		db.User, db.Password, db.Host, db.Port, db.DBName, db.SSLMode,
+		getEnv("DB_USER", AppConfig.Database.User),
+		getEnv("DB_PASSWORD", AppConfig.Database.Password),
+		getEnv("DB_HOST", AppConfig.Database.Host),
+		getEnv("DB_PORT", fmt.Sprint(AppConfig.Database.Port)),
+		getEnv("DB_NAME", AppConfig.Database.DBName),
+		getEnv("DB_SSLMODE", AppConfig.Database.SSLMode),
 	)
+}
+
+func getEnv(key, fallback string) string {
+	if val, ok := os.LookupEnv(key); ok {
+		return val
+	}
+	return fallback
 }

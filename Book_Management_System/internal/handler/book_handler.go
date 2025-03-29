@@ -1,0 +1,126 @@
+package handler
+
+import (
+	"book_management_system/internal/model"
+	"book_management_system/internal/service_interface"
+	"encoding/json"
+	"net/http"
+
+	"github.com/go-chi/chi/v5"
+	"github.com/go-playground/validator/v10"
+	"github.com/google/uuid"
+)
+
+var validate = validator.New()
+
+type BookHandler struct {
+	svc service_interface.BookService
+}
+
+func NewBookHandler(svc service_interface.BookService) *BookHandler {
+	return &BookHandler{svc: svc}
+}
+
+func (h *BookHandler) Create(w http.ResponseWriter, r *http.Request) {
+	var req model.BookRequest
+	if err := json.NewDecoder(r.Body).Decode(&req); err != nil {
+		writeError(w, http.StatusBadRequest, "Invalid JSON body")
+		return
+	}
+
+	if err := validate.Struct(req); err != nil {
+		writeError(w, http.StatusBadRequest, err.Error())
+		return
+	}
+
+	res, err := h.svc.CreateBook(r.Context(), req)
+	if err != nil {
+		writeError(w, http.StatusInternalServerError, "Error creating book: "+err.Error())
+		return
+	}
+
+	writeJSON(w, http.StatusCreated, res)
+}
+
+func (h *BookHandler) Delete(w http.ResponseWriter, r *http.Request) {
+	idStr := chi.URLParam(r, "id")
+	id, err := uuid.Parse(idStr)
+	if err != nil {
+		writeError(w, http.StatusBadRequest, "Invalid book ID format")
+		return
+	}
+
+	if err := h.svc.DeleteBook(r.Context(), id); err != nil {
+		writeError(w, http.StatusInternalServerError, "Failed to delete book: "+err.Error())
+		return
+	}
+
+	w.WriteHeader(http.StatusNoContent)
+}
+
+func (h *BookHandler) GetAll(w http.ResponseWriter, r *http.Request) {
+	res, err := h.svc.GetAllBooks(r.Context())
+	if err != nil {
+		writeError(w, http.StatusInternalServerError, "Failed to fetch books: "+err.Error())
+		return
+	}
+
+	writeJSON(w, http.StatusOK, res)
+}
+
+func (h *BookHandler) GetOne(w http.ResponseWriter, r *http.Request) {
+	idStr := chi.URLParam(r, "id")
+	id, err := uuid.Parse(idStr)
+	if err != nil {
+		writeError(w, http.StatusBadRequest, "Invalid book ID format")
+		return
+	}
+
+	res, err := h.svc.GetBookByID(r.Context(), id)
+	if err != nil {
+		writeError(w, http.StatusNotFound, "Book not found")
+		return
+	}
+
+	writeJSON(w, http.StatusOK, res)
+}
+
+func (h *BookHandler) Update(w http.ResponseWriter, r *http.Request) {
+	idStr := chi.URLParam(r, "id")
+	id, err := uuid.Parse(idStr)
+	if err != nil {
+		writeError(w, http.StatusBadRequest, "Invalid book ID format")
+		return
+	}
+
+	var req model.BookRequest
+	if err := json.NewDecoder(r.Body).Decode(&req); err != nil {
+		writeError(w, http.StatusBadRequest, "Invalid JSON body")
+		return
+	}
+
+	if err := validate.Struct(req); err != nil {
+		writeError(w, http.StatusBadRequest, err.Error())
+		return
+	}
+
+	res, err := h.svc.UpdateBook(r.Context(), id, req)
+	if err != nil {
+		writeError(w, http.StatusInternalServerError, "Failed to update book: "+err.Error())
+		return
+	}
+
+	writeJSON(w, http.StatusOK, res)
+}
+
+func writeJSON(w http.ResponseWriter, status int, data interface{}) {
+	w.Header().Set("Content-Type", "application/json")
+	w.WriteHeader(status)
+	if err := json.NewEncoder(w).Encode(data); err != nil {
+		http.Error(w, "Failed to encode JSON response", http.StatusInternalServerError)
+	}
+}
+
+func writeError(w http.ResponseWriter, status int, message string) {
+	writeJSON(w, status, map[string]string{"error": message})
+}

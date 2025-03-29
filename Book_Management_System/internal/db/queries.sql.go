@@ -206,6 +206,47 @@ func (q *Queries) GetPublisherByID(ctx context.Context, publisherID uuid.UUID) (
 	return i, err
 }
 
+const searchBooks = `-- name: SearchBooks :many
+SELECT book_id, author_id, publisher_id, title, publication_date, isbn, pages, genre, description, price, quantity
+FROM books
+WHERE LOWER(title) LIKE LOWER('%' || $1 || '%') OR LOWER(description) LIKE LOWER('%' || $1 || '%')
+`
+
+func (q *Queries) SearchBooks(ctx context.Context, dollar_1 sql.NullString) ([]Book, error) {
+	rows, err := q.db.QueryContext(ctx, searchBooks, dollar_1)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+	var items []Book
+	for rows.Next() {
+		var i Book
+		if err := rows.Scan(
+			&i.BookID,
+			&i.AuthorID,
+			&i.PublisherID,
+			&i.Title,
+			&i.PublicationDate,
+			&i.Isbn,
+			&i.Pages,
+			&i.Genre,
+			&i.Description,
+			&i.Price,
+			&i.Quantity,
+		); err != nil {
+			return nil, err
+		}
+		items = append(items, i)
+	}
+	if err := rows.Close(); err != nil {
+		return nil, err
+	}
+	if err := rows.Err(); err != nil {
+		return nil, err
+	}
+	return items, nil
+}
+
 const updateBook = `-- name: UpdateBook :one
 UPDATE books SET
                  author_id = $2,

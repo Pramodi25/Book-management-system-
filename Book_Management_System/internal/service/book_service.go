@@ -20,6 +20,7 @@ type BookDBServiceProvider interface {
 	UpdateBook(ctx context.Context, arg db.UpdateBookParams) (db.Book, error)
 	GetAuthorByID(ctx context.Context, authorID uuid.UUID) (db.Author, error)
 	GetPublisherByID(ctx context.Context, publisherID uuid.UUID) (db.Publisher, error)
+	SearchBooks(ctx context.Context, keyword sql.NullString) ([]db.Book, error)
 }
 
 type BookService struct {
@@ -113,6 +114,29 @@ func (s *BookService) UpdateBook(ctx context.Context, id uuid.UUID, req model.Bo
 
 	bookResponse := model.BookResponseFromDB(book)
 	return &bookResponse, nil
+}
+
+func (s *BookService) SearchBooks(ctx context.Context, keyword string) ([]*model.BookResponse, error) {
+	if keyword == "" {
+		return nil, fmt.Errorf("keyword cannot be empty")
+	}
+
+	keywordParam := sql.NullString{
+		String: keyword,
+		Valid:  true,
+	}
+
+	books, err := s.q.SearchBooks(ctx, keywordParam)
+	if err != nil {
+		return nil, err
+	}
+
+	var result []*model.BookResponse
+	for _, b := range books {
+		book := model.BookResponseFromDB(b)
+		result = append(result, &book)
+	}
+	return result, nil
 }
 
 func (s *BookService) DeleteBook(ctx context.Context, id uuid.UUID) error {

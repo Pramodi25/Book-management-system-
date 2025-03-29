@@ -44,6 +44,7 @@ func main() {
 		r.Get("/{id}", bookHandler.GetOne)
 		r.Put("/{id}", bookHandler.Update)
 		r.Delete("/{id}", bookHandler.Delete)
+		r.Get("/search", bookHandler.Search)
 	})
 
 	r.Post("/authors", authorHandler.Create)

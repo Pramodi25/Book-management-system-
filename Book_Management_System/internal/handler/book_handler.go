@@ -113,6 +113,22 @@ func (h *BookHandler) Update(w http.ResponseWriter, r *http.Request) {
 	writeJSON(w, http.StatusOK, res)
 }
 
+func (h *BookHandler) Search(w http.ResponseWriter, r *http.Request) {
+	query := r.URL.Query().Get("q")
+	if query == "" {
+		writeError(w, http.StatusBadRequest, "Query parameter 'q' is required")
+		return
+	}
+
+	results, err := h.svc.SearchBooks(r.Context(), query)
+	if err != nil {
+		writeError(w, http.StatusInternalServerError, "Search failed: "+err.Error())
+		return
+	}
+
+	writeJSON(w, http.StatusOK, results)
+}
+
 func writeJSON(w http.ResponseWriter, status int, data interface{}) {
 	w.Header().Set("Content-Type", "application/json")
 	w.WriteHeader(status)

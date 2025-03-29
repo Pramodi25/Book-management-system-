@@ -12,4 +12,5 @@ type BookService interface {
 	GetBookByID(ctx context.Context, id uuid.UUID) (*model.BookResponse, error)
 	UpdateBook(ctx context.Context, id uuid.UUID, req model.BookRequest) (*model.BookResponse, error)
 	DeleteBook(ctx context.Context, id uuid.UUID) error
+	SearchBooks(ctx context.Context, keyword string) ([]*model.BookResponse, error)
 }

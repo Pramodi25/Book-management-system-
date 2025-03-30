@@ -63,7 +63,7 @@ func (h *BookHandler) GetAll(w http.ResponseWriter, r *http.Request) {
 	query := r.URL.Query()
 
 	var limit *int32
-	var offset *int32
+	var page *int32
 
 	// Optional limit
 	if limitStr := query.Get("limit"); limitStr != "" {
@@ -83,14 +83,15 @@ func (h *BookHandler) GetAll(w http.ResponseWriter, r *http.Request) {
 				writeError(w, http.StatusBadRequest, "'limit' must be set if 'page' is provided")
 				return
 			}
-			offset = limit
+			val := int32(p)
+			page = &val
 		} else {
 			writeError(w, http.StatusBadRequest, "Invalid 'page' parameter")
 			return
 		}
 	}
 
-	res, err := h.svc.GetAllBooks(r.Context(), limit, offset)
+	res, err := h.svc.GetAllBooks(r.Context(), page, limit)
 	if err != nil {
 		writeError(w, http.StatusInternalServerError, "Failed to fetch books: "+err.Error())
 		return

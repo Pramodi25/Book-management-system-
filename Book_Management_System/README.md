@@ -40,6 +40,7 @@ You can run the project in two ways: **using Docker**
 3. **Run with Docker Compose:**
 
 ```bash
+docker compose down --volumes
 docker-compose up --build
 ```
 

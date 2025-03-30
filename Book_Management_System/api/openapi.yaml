@@ -1,0 +1,174 @@
+openapi: 3.0.3
+info:
+  title: Book Management API
+  description: API for managing books, authors, and publishers.
+  version: 1.0.0
+
+servers:
+  - url: http://localhost:8080
+    description: Local development server
+
+paths:
+  /status:
+    get:
+      summary: Check database connection status
+      responses:
+        '200':
+          description: Server is healthy
+        '503':
+          description: Database not available
+
+  /books:
+    get:
+      summary: Get all books
+      parameters:
+        - in: query
+          name: limit
+          schema:
+            type: integer
+        - in: query
+          name: page
+          schema:
+            type: integer
+      responses:
+        '200':
+          description: List of books
+
+    post:
+      summary: Create a new book
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/BookRequest'
+      responses:
+        '201':
+          description: Book created
+
+  /books/search:
+    get:
+      summary: Search books
+      parameters:
+        - in: query
+          name: q
+          required: true
+          schema:
+            type: string
+        - in: query
+          name: limit
+          schema:
+            type: integer
+        - in: query
+          name: page
+          schema:
+            type: integer
+      responses:
+        '200':
+          description: Search results
+
+  /books/{id}:
+    get:
+      summary: Get book by ID
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: Book details
+
+    put:
+      summary: Update book by ID
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/BookRequest'
+      responses:
+        '200':
+          description: Book updated
+
+    delete:
+      summary: Delete book by ID
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        '204':
+          description: Book deleted
+
+  /authors:
+    post:
+      summary: Create a new author
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/AuthorRequest'
+      responses:
+        '201':
+          description: Author created
+
+  /publishers:
+    post:
+      summary: Create a new publisher
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/PublisherRequest'
+      responses:
+        '201':
+          description: Publisher created
+
+components:
+  schemas:
+    BookRequest:
+      type: object
+      properties:
+        title:
+          type: string
+        authorId:
+          type: string
+        publisherId:
+          type: string
+        publishedYear:
+          type: integer
+        description:
+          type: string
+      required: [title, authorId, publisherId, publishedYear]
+
+    AuthorRequest:
+      type: object
+      properties:
+        authorId:
+          type: string
+        name:
+          type: string
+        bio:
+          type: string
+      required: [authorId, name, bio]
+
+    PublisherRequest:
+      type: object
+      properties:
+        name:
+          type: string
+        address:
+          type: string
+      required: [name, address]

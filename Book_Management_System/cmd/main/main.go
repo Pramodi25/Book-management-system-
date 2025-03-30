@@ -1,4 +1,3 @@
-// main.go
 package main
 
 import (
@@ -6,26 +5,39 @@ import (
 	"fmt"
 	"log"
 	"net/http"
+	"time"
 
 	"book_management_system/internal/config"
 	"book_management_system/internal/db"
 	"book_management_system/internal/handler"
 	"book_management_system/internal/service"
+
 	"github.com/go-chi/chi/v5"
 	_ "github.com/lib/pq"
 )
 
 func main() {
 	if err := config.Init(); err != nil {
-		log.Fatalf("Error loading config: %v", err)
+		log.Fatalf("❌ Error loading config: %v", err)
 	}
 
 	conn, err := sql.Open("postgres", config.GetDBSource())
 	if err != nil {
-		log.Fatalf("Cannot connect to DB: %v", err)
-		return
+		log.Fatalf("❌ Cannot connect to DB: %v", err)
 	}
-	defer conn.Close()
+
+	// Optional: Wait for DB to be ready (good in Docker Compose setup)
+	for i := 0; i < 10; i++ {
+		if err := conn.Ping(); err == nil {
+			log.Println("✅ Database connection successful")
+			break
+		}
+		log.Println("⏳ Waiting for database to be ready...")
+		time.Sleep(2 * time.Second)
+	}
+	if err := conn.Ping(); err != nil {
+		log.Fatalf("❌ Could not establish connection to database: %v", err)
+	}
 
 	queries := db.New(conn)
 	bookService := service.NewBookService(queries)
@@ -35,6 +47,7 @@ func main() {
 	publisherService := service.NewPublisherService(queries)
 	publisherHandler := handler.NewPublisherHandler(publisherService)
 
+	// Router setup
 	r := chi.NewRouter()
 	r.Get("/status", handler.StatusHandler(conn))
 
@@ -50,7 +63,14 @@ func main() {
 	r.Post("/authors", authorHandler.Create)
 	r.Post("/publishers", publisherHandler.Create)
 
-	addr := fmt.Sprintf(":%d", config.AppConfig.Server.Port)
+	// Start server
+	port := config.AppConfig.Server.Port
+	if port == 0 {
+		port = 8080 // fallback
+	}
+	addr := fmt.Sprintf(":%d", port)
 	log.Printf("🚀 Server started at %s", addr)
-	log.Fatal(http.ListenAndServe(addr, r))
+	if err := http.ListenAndServe(addr, r); err != nil {
+		log.Fatalf("❌ Server failed: %v", err)
+	}
 }

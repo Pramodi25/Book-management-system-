@@ -2,6 +2,9 @@
 -- name: GetAllBooks :many
 SELECT * FROM books;
 
+-- name: GetBooksCount :one
+SELECT COUNT(*) FROM books;
+
 -- name: GetBookByID :one
 SELECT * FROM books WHERE book_id = $1;
 
@@ -59,6 +62,19 @@ SELECT * FROM publishers WHERE publisher_id = $1;
 SELECT book_id, author_id, publisher_id, title, publication_date, isbn, pages, genre, description, price, quantity
 FROM books
 WHERE LOWER(title) LIKE LOWER('%' || $1 || '%') OR LOWER(description) LIKE LOWER('%' || $1 || '%');
+
+-- name: SearchBooksPaginated :many
+SELECT book_id, author_id, publisher_id, title, publication_date, isbn, pages, genre, description, price, quantity
+FROM books
+WHERE LOWER(title) LIKE LOWER('%' || $1 || '%')
+   OR LOWER(description) LIKE LOWER('%' || $1 || '%')
+    LIMIT $2 OFFSET $3;
+
+-- name: GetSearchBooksCount :one
+SELECT COUNT(*)
+FROM books
+WHERE LOWER(title) LIKE LOWER('%' || $1 || '%')
+   OR LOWER(description) LIKE LOWER('%' || $1 || '%');
 
 -- name: GetBooksPaginated :many
 SELECT book_id, author_id, publisher_id, title, publication_date, isbn, pages, genre, description, price, quantity

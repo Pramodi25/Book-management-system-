@@ -76,15 +76,14 @@ func (h *BookHandler) GetAll(w http.ResponseWriter, r *http.Request) {
 		}
 	}
 
-	// Optional page → converted to offset
+	// Optional page
 	if pageStr := query.Get("page"); pageStr != "" {
 		if p, err := strconv.Atoi(pageStr); err == nil && p > 0 {
 			if limit == nil {
 				writeError(w, http.StatusBadRequest, "'limit' must be set if 'page' is provided")
 				return
 			}
-			val := int32((p - 1) * int(*limit))
-			offset = &val
+			offset = limit
 		} else {
 			writeError(w, http.StatusBadRequest, "Invalid 'page' parameter")
 			return
@@ -146,19 +145,50 @@ func (h *BookHandler) Update(w http.ResponseWriter, r *http.Request) {
 }
 
 func (h *BookHandler) Search(w http.ResponseWriter, r *http.Request) {
-	query := r.URL.Query().Get("q")
-	if query == "" {
+	q := r.URL.Query()
+	keyword := q.Get("q")
+
+	if keyword == "" {
 		writeError(w, http.StatusBadRequest, "Query parameter 'q' is required")
 		return
 	}
 
-	results, err := h.svc.SearchBooks(r.Context(), query)
+	var limit *int32
+	var page *int32
+
+	// Parse limit
+	if limitStr := q.Get("limit"); limitStr != "" {
+		if l, err := strconv.Atoi(limitStr); err == nil && l > 0 {
+			val := int32(l)
+			limit = &val
+		} else {
+			writeError(w, http.StatusBadRequest, "Invalid 'limit' parameter")
+			return
+		}
+	}
+
+	// Parse page
+	if pageStr := q.Get("page"); pageStr != "" {
+		if p, err := strconv.Atoi(pageStr); err == nil && p > 0 {
+			if limit == nil {
+				writeError(w, http.StatusBadRequest, "'limit' must be set if 'page' is provided")
+				return
+			}
+			val := int32(p)
+			page = &val
+		} else {
+			writeError(w, http.StatusBadRequest, "Invalid 'page' parameter")
+			return
+		}
+	}
+
+	res, err := h.svc.SearchBooks(r.Context(), keyword, page, limit)
 	if err != nil {
 		writeError(w, http.StatusInternalServerError, "Search failed: "+err.Error())
 		return
 	}
 
-	writeJSON(w, http.StatusOK, results)
+	writeJSON(w, http.StatusOK, res)
 }
 
 func writeJSON(w http.ResponseWriter, status int, data interface{}) {

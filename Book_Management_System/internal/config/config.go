@@ -10,7 +10,7 @@ import (
 type Config struct {
 	Server struct {
 		Port int `yaml:"port"`
-	} `yaml:"server"`
+	} `yaml:"main"`
 
 	Database struct {
 		Host     string `yaml:"host"`
@@ -25,15 +25,22 @@ type Config struct {
 var AppConfig *Config
 
 func Init() error {
-	data, err := os.ReadFile("config.yaml")
+	configPath := os.Getenv("CONFIG_PATH")
+	if configPath == "" {
+		configPath = "config.yaml"
+	}
+
+	data, err := os.ReadFile(configPath)
 	if err != nil {
-		return err
+		return fmt.Errorf("failed to read config file %s: %w", configPath, err)
 	}
 
 	var cfg Config
 	if err := yaml.Unmarshal(data, &cfg); err != nil {
-		return err
+		return fmt.Errorf("failed to unmarshal config file: %w", err)
 	}
+
+	fmt.Printf("✅ Loaded config: %+v\n", cfg)
 
 	AppConfig = &cfg
 	return nil
@@ -41,11 +48,11 @@ func Init() error {
 
 func GetDBSource() string {
 	return fmt.Sprintf(
-		"postgres://%s:%s@%s:%d/%s?sslmode=%s",
+		"postgres://%s:%s@%s:%s/%s?sslmode=%s",
 		getEnv("DB_USER", AppConfig.Database.User),
 		getEnv("DB_PASSWORD", AppConfig.Database.Password),
 		getEnv("DB_HOST", AppConfig.Database.Host),
-		getEnv("DB_PORT", fmt.Sprint(AppConfig.Database.Port)),
+		getEnv("DB_PORT", fmt.Sprintf("%d", AppConfig.Database.Port)), // ✅ FIXED HERE
 		getEnv("DB_NAME", AppConfig.Database.DBName),
 		getEnv("DB_SSLMODE", AppConfig.Database.SSLMode),
 	)

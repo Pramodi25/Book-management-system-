@@ -86,23 +86,29 @@ func (s *BookService) GetAllBooks(ctx context.Context, page *int32, limit *int32
 	)
 
 	if page != nil && limit != nil && *page > 0 && *limit > 0 {
-		offset := (*page - 1) * (*limit)
-
-		books, err = s.q.GetBooksPaginated(ctx, db.GetBooksPaginatedParams{
-			Limit:  *limit,
-			Offset: offset,
-		})
-		if err != nil {
-			slog.Error("Failed to get paginated books", slog.String("error", err.Error()))
-			return nil, err
-		}
-
 		count, err := s.q.GetBooksCount(ctx)
 		if err != nil {
 			return nil, err
 		}
 		totalVal := int32(count)
 		total = &totalVal
+
+		offset := (*page - 1) * (*limit)
+
+		// Adjust limit for the last page
+		actualLimit := *limit
+		if remaining := totalVal - offset; remaining < *limit {
+			actualLimit = remaining
+		}
+
+		books, err = s.q.GetBooksPaginated(ctx, db.GetBooksPaginatedParams{
+			Limit:  actualLimit,
+			Offset: offset,
+		})
+		if err != nil {
+			slog.Error("Failed to get paginated books", slog.String("error", err.Error()))
+			return nil, err
+		}
 	} else {
 		books, err = s.q.GetAllBooks(ctx)
 		if err != nil {
@@ -180,23 +186,29 @@ func (s *BookService) SearchBooks(ctx context.Context, keyword string, page *int
 	var total *int32
 
 	if page != nil && limit != nil && *page > 0 && *limit > 0 {
-		offset := (*page - 1) * (*limit)
-
-		books, err = s.q.SearchBooksPaginated(ctx, db.SearchBooksPaginatedParams{
-			Column1: keywordParam,
-			Limit:   *limit,
-			Offset:  offset,
-		})
-		if err != nil {
-			return nil, err
-		}
-
 		t, err := s.q.GetSearchBooksCount(ctx, keywordParam)
 		if err != nil {
 			return nil, err
 		}
 		t32 := int32(t)
 		total = &t32
+
+		offset := (*page - 1) * (*limit)
+
+		// Adjust the limit for the last page
+		actualLimit := *limit
+		if remaining := t32 - offset; remaining < *limit {
+			actualLimit = remaining
+		}
+
+		books, err = s.q.SearchBooksPaginated(ctx, db.SearchBooksPaginatedParams{
+			Column1: keywordParam,
+			Limit:   actualLimit,
+			Offset:  offset,
+		})
+		if err != nil {
+			return nil, err
+		}
 	} else {
 		books, err = s.q.SearchBooks(ctx, keywordParam)
 		if err != nil {

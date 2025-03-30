@@ -1,0 +1,16 @@
+# IntelliJ / JetBrains IDEs
+.idea/
+*.iml
+*.iws
+workspace.xml
+tasks.xml
+shelf/
+modules.xml
+vcs.xml
+
+# HTTP client requests
+httpRequests/
+
+# Data sources
+dataSources/
+dataSources.local.xml

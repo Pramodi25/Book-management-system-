@@ -40,7 +40,7 @@ func Init() error {
 		return fmt.Errorf("failed to unmarshal config file: %w", err)
 	}
 
-	fmt.Printf("✅ Loaded config: %+v\n", cfg)
+	fmt.Printf("Loaded config: %+v\n", cfg)
 
 	AppConfig = &cfg
 	return nil
@@ -52,7 +52,7 @@ func GetDBSource() string {
 		getEnv("DB_USER", AppConfig.Database.User),
 		getEnv("DB_PASSWORD", AppConfig.Database.Password),
 		getEnv("DB_HOST", AppConfig.Database.Host),
-		getEnv("DB_PORT", fmt.Sprintf("%d", AppConfig.Database.Port)), // ✅ FIXED HERE
+		getEnv("DB_PORT", fmt.Sprintf("%d", AppConfig.Database.Port)),
 		getEnv("DB_NAME", AppConfig.Database.DBName),
 		getEnv("DB_SSLMODE", AppConfig.Database.SSLMode),
 	)

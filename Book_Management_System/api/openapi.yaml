@@ -141,17 +141,38 @@ components:
     BookRequest:
       type: object
       properties:
-        title:
+        bookId:
           type: string
+          format: uuid
+          example: 49e3ea6b-fa64-463b-a19c-577503cf0ab3
         authorId:
+          type: string
+          format: uuid
+          example: e9df21b5-47ae-44b8-88fb-64e8e5161306
+        title:
           type: string
         publisherId:
           type: string
-        publishedYear:
+          format: uuid
+          example: 10a3b0e7-ebc9-4af1-93c9-781d6f50b536
+        publicationDate:
+          type: string
+        isbn:
+          type: string
+        pages:
           type: integer
+          format: int32
+        genre:
+          type: string
         description:
           type: string
-      required: [title, authorId, publisherId, publishedYear]
+        price:
+          type: string
+          format: float64
+        quantity:
+          type: integer
+          format: int32
+      required: [bookId, authorId, publisherId,title,publicationDate,isbn,pages,genre,price,quantity]
 
     AuthorRequest:
       type: object

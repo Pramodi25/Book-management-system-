@@ -18,25 +18,25 @@ import (
 
 func main() {
 	if err := config.Init(); err != nil {
-		log.Fatalf("❌ Error loading config: %v", err)
+		log.Fatalf("Error loading config: %v", err)
 	}
 
 	conn, err := sql.Open("postgres", config.GetDBSource())
 	if err != nil {
-		log.Fatalf("❌ Cannot connect to DB: %v", err)
+		log.Fatalf("Cannot connect to DB: %v", err)
 	}
 
 	// Optional: Wait for DB to be ready (good in Docker Compose setup)
 	for i := 0; i < 10; i++ {
 		if err := conn.Ping(); err == nil {
-			log.Println("✅ Database connection successful")
+			log.Println("Database connection successful")
 			break
 		}
 		log.Println("⏳ Waiting for database to be ready...")
 		time.Sleep(2 * time.Second)
 	}
 	if err := conn.Ping(); err != nil {
-		log.Fatalf("❌ Could not establish connection to database: %v", err)
+		log.Fatalf("Could not establish connection to database: %v", err)
 	}
 
 	queries := db.New(conn)
@@ -69,8 +69,8 @@ func main() {
 		port = 8080 // fallback
 	}
 	addr := fmt.Sprintf(":%d", port)
-	log.Printf("🚀 Server started at %s", addr)
+	log.Printf("Server started at %s", addr)
 	if err := http.ListenAndServe(addr, r); err != nil {
-		log.Fatalf("❌ Server failed: %v", err)
+		log.Fatalf("Server failed: %v", err)
 	}
 }

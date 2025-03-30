@@ -116,7 +116,7 @@ func (s *BookService) GetAllBooks(ctx context.Context, page *int32, limit *int32
 		}
 	}
 
-	var res []*model.BookResponse
+	res := []*model.BookResponse{}
 	for _, b := range books {
 		book := model.BookResponseFromDB(b)
 		res = append(res, &book)
@@ -215,8 +215,7 @@ func (s *BookService) SearchBooks(ctx context.Context, keyword string, page *int
 			return nil, err
 		}
 	}
-
-	var result []*model.BookResponse
+	result := []*model.BookResponse{}
 	for _, b := range books {
 		book := model.BookResponseFromDB(b)
 		result = append(result, &book)

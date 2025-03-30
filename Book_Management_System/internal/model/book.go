@@ -17,7 +17,7 @@ type BookRequest struct {
 	Genre           string    `json:"genre" validate:"required"`
 	Description     string    `json:"description"`
 	Price           float64   `json:"price" validate:"required,gte=0"`
-	Quantity        int32     `json:"quantity" validate:"required,gte=0"`
+	Quantity        int32     `json:"quantity" validate:"gte=0"`
 }
 
 type GetBooksResponse struct {

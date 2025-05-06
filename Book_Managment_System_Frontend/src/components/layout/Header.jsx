@@ -10,12 +10,12 @@ const Header = () => {
   };
 
   return (
-    <header className="bg-gradient-to-r from-indigo-600 to-blue-500 shadow-lg">
-      <div className="container mx-auto px-4 py-3">
+    <header className="bg-gradient-to-r from-primary-peach to-primary-purple shadow-lg">
+      <div className="container mx-auto px-4 sm:px-6 md:px-8 lg:px-12 max-w-7xl py-3">
         <div className="flex items-center justify-between">
           <Link to="/" className="flex items-center space-x-2">
-            <span className="text-3xl">📚</span>
-            <span className="text-white text-xl font-bold tracking-tight">BookManager</span>
+            <span className="text-3xl"></span>
+            <span className="text-white text-xl font-bold tracking-tight">Book Vault</span>
           </Link>
           
           {/* Desktop Navigation */}
@@ -59,7 +59,7 @@ const Header = () => {
         
         {/* Mobile Navigation */}
         {isMobileMenuOpen && (
-          <nav className="md:hidden mt-4 py-3 border-t border-blue-400 space-y-3">
+          <nav className="md:hidden mt-4 py-3 border-t border-primary-lavender space-y-3">
             <MobileNavLink to="/" isActive={isActiveRoute('/')} onClick={() => setIsMobileMenuOpen(false)}>
               Dashboard
             </MobileNavLink>
@@ -87,8 +87,8 @@ const NavLink = ({ to, isActive, children }) => (
     to={to}
     className={`${
       isActive 
-        ? 'text-white font-semibold border-b-2 border-white pb-1' 
-        : 'text-blue-100 hover:text-white hover:border-b-2 hover:border-blue-200 pb-1'
+        ? 'text-white font-semibold border-b-2 border-primary-peach pb-1' 
+        : 'text-primary-lavender hover:text-white hover:border-b-2 hover:border-primary-lavender pb-1'
     } transition-all duration-200`}
   >
     {children}
@@ -101,8 +101,8 @@ const MobileNavLink = ({ to, isActive, onClick, children }) => (
     onClick={onClick}
     className={`block ${
       isActive 
-        ? 'text-white font-medium bg-blue-600 rounded-md px-3 py-2' 
-        : 'text-blue-100 hover:bg-blue-600 hover:text-white rounded-md px-3 py-2'
+        ? 'text-white font-medium bg-primary-navy rounded-md px-3 py-2' 
+        : 'text-primary-lavender hover:bg-primary-mauve hover:text-white rounded-md px-3 py-2'
     } transition-all duration-200`}
   >
     {children}

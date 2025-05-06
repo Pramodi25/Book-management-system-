@@ -28,37 +28,37 @@ const Dashboard = () => {
   }, [books, totalBooks]);
 
   return (
-    <div>
+    <div className="w-full">
       <div className="mb-8">
-        <h1 className="text-3xl font-bold text-gray-800 mb-2">Dashboard</h1>
-        <p className="text-gray-600">Welcome to your Book Management System</p>
+        <h1 className="text-3xl font-bold text-primary-navy mb-2">Dashboard</h1>
+        <p className="text-primary-mauve">Welcome to your Book Management System</p>
       </div>
       
       {/* Stats Cards */}
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
+      <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8 w-full">
         <StatsCard 
           title="Total Books" 
           value={stats.totalBooks} 
           icon={<BookIcon />} 
-          color="blue"
+          color="purple"
         />
         
         <StatsCard 
           title="Genres" 
           value={stats.genres} 
           icon={<CategoryIcon />} 
-          color="green"
+          color="peach"
         />
         
         <StatsCard 
           title="Low Stock" 
           value={stats.lowStock} 
           icon={<AlertIcon />} 
-          color="red"
+          color="navy"
         />
       </div>
       
-      <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 mb-8">
+      <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 mb-8 w-full">
         {/* Recent Books */}
         <Card 
           title="Recent Books"
@@ -67,7 +67,7 @@ const Dashboard = () => {
           cardType="primary"
           isLoading={loading}
           footer={
-            <Link to="/books" className="text-blue-600 hover:text-blue-800 font-medium flex items-center">
+            <Link to="/books" className="text-primary-purple hover:text-primary-peach font-medium flex items-center">
               View All Books
               <svg className="ml-1 w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 7l5 5m0 0l-5 5m5-5H6" />
@@ -81,7 +81,7 @@ const Dashboard = () => {
             </div>
           ) : books.length === 0 ? (
             <div className="text-center py-8">
-              <p className="text-gray-500 mb-4">No books available</p>
+              <p className="text-primary-mauve mb-4">No books available</p>
               <Button 
                 as={Link} 
                 to="/books/new" 
@@ -93,21 +93,21 @@ const Dashboard = () => {
               </Button>
             </div>
           ) : (
-            <div className="divide-y divide-gray-100">
+            <div className="divide-y divide-primary-lavender divide-opacity-20">
               {books.slice(0, 5).map(book => (
                 <Link
                   key={book.bookId}
                   to={`/books/${book.bookId}`}
-                  className="block py-3 px-2 -mx-2 rounded-lg hover:bg-gray-50 transition-colors"
+                  className="block py-3 px-2 -mx-2 rounded-lg hover:bg-primary-lavender hover:bg-opacity-10 transition-colors"
                 >
                   <div className="flex justify-between items-center">
                     <div>
-                      <h3 className="font-medium text-gray-800">{book.title}</h3>
-                      <p className="text-sm text-gray-500">
+                      <h3 className="font-medium text-primary-navy">{book.title}</h3>
+                      <p className="text-sm text-primary-mauve">
                         {book.genre} • {book.quantity} in stock
                       </p>
                     </div>
-                    <div className="text-lg font-semibold text-gray-800">
+                    <div className="text-lg font-semibold text-primary-peach">
                       ${book.price.toFixed(2)}
                     </div>
                   </div>
@@ -121,7 +121,7 @@ const Dashboard = () => {
         <Card
           title="Quick Actions"
           icon={<LightningIcon />}
-          cardType="info"
+          cardType="peach"
         >
           <div className="space-y-3">
             <Link to="/books/new" className="block w-full">
@@ -176,7 +176,7 @@ const Dashboard = () => {
         title="System Status"
         subtitle="Current system parameters and status"
         icon={<ServerIcon />}
-        cardType="default"
+        cardType="navy"
       >
         <div className="space-y-4">
           <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
@@ -191,21 +191,29 @@ const Dashboard = () => {
 };
 
 // Stats Card Component
-const StatsCard = ({ title, value, icon, color = 'blue' }) => {
+const StatsCard = ({ title, value, icon, color = 'purple' }) => {
   const colorClasses = {
+    purple: 'bg-primary-purple bg-opacity-10 text-primary-purple',
+    peach: 'bg-primary-peach bg-opacity-10 text-primary-peach',
+    navy: 'bg-primary-navy bg-opacity-10 text-primary-navy',
+    mauve: 'bg-primary-mauve bg-opacity-10 text-primary-mauve',
+    lavender: 'bg-primary-lavender bg-opacity-20 text-primary-purple',
     blue: 'bg-blue-50 text-blue-700',
     green: 'bg-green-50 text-green-700',
     red: 'bg-red-50 text-red-700',
     yellow: 'bg-yellow-50 text-yellow-700',
-    indigo: 'bg-indigo-50 text-indigo-700',
   };
   
   const textColorClasses = {
+    purple: 'text-primary-purple',
+    peach: 'text-primary-peach',
+    navy: 'text-primary-navy',
+    mauve: 'text-primary-mauve',
+    lavender: 'text-primary-lavender',
     blue: 'text-blue-600',
     green: 'text-green-600',
     red: 'text-red-600',
     yellow: 'text-yellow-600',
-    indigo: 'text-indigo-600',
   };
   
   return (
@@ -216,7 +224,7 @@ const StatsCard = ({ title, value, icon, color = 'blue' }) => {
             {icon}
           </div>
           <div className="ml-4">
-            <h2 className="text-sm font-medium text-gray-500">{title}</h2>
+            <h2 className="text-sm font-medium text-primary-mauve">{title}</h2>
             <div className={`text-3xl font-bold ${textColorClasses[color]}`}>
               {value}
             </div>
@@ -233,14 +241,14 @@ const StatusItem = ({ title, value, status }) => {
     success: 'bg-green-50 text-green-700',
     warning: 'bg-yellow-50 text-yellow-700',
     danger: 'bg-red-50 text-red-700',
-    info: 'bg-blue-50 text-blue-700',
+    info: 'bg-primary-lavender bg-opacity-20 text-primary-purple',
   };
   
   const dotClasses = {
     success: 'bg-green-500',
     warning: 'bg-yellow-500',
     danger: 'bg-red-500',
-    info: 'bg-blue-500',
+    info: 'bg-primary-purple',
   };
   
   return (

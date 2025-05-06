@@ -17,16 +17,17 @@ const Button = ({
   const baseClasses = 'inline-flex items-center justify-center rounded-lg font-medium transition-all duration-150 focus:outline-none focus:ring-2 focus:ring-offset-2';
   
   const variantClasses = {
-    primary: 'bg-blue-600 text-white hover:bg-blue-700 focus:ring-blue-500 shadow-sm',
-    secondary: 'bg-gray-100 text-gray-800 hover:bg-gray-200 focus:ring-gray-400 border border-gray-200',
+    primary: 'bg-primary-purple text-white hover:bg-primary-navy focus:ring-primary-mauve shadow-sm',
+    secondary: 'bg-primary-lavender bg-opacity-20 text-primary-navy hover:bg-primary-lavender hover:bg-opacity-30 focus:ring-primary-mauve border border-primary-lavender',
     success: 'bg-green-600 text-white hover:bg-green-700 focus:ring-green-500 shadow-sm',
     danger: 'bg-red-600 text-white hover:bg-red-700 focus:ring-red-500 shadow-sm',
     warning: 'bg-yellow-500 text-white hover:bg-yellow-600 focus:ring-yellow-400 shadow-sm',
-    info: 'bg-indigo-500 text-white hover:bg-indigo-600 focus:ring-indigo-400 shadow-sm',
-    light: 'bg-white text-gray-700 hover:bg-gray-50 focus:ring-gray-200 border border-gray-300 shadow-sm',
-    dark: 'bg-gray-800 text-white hover:bg-gray-900 focus:ring-gray-700 shadow-sm',
-    link: 'bg-transparent text-blue-600 hover:text-blue-800 hover:underline',
-    outline: 'bg-transparent border border-current text-blue-600 hover:bg-blue-50',
+    info: 'bg-primary-mauve text-white hover:bg-primary-purple focus:ring-primary-lavender shadow-sm',
+    light: 'bg-white text-primary-navy hover:bg-primary-lavender hover:bg-opacity-10 focus:ring-primary-lavender border border-primary-lavender shadow-sm',
+    dark: 'bg-primary-navy text-white hover:bg-opacity-90 focus:ring-primary-mauve shadow-sm',
+    link: 'bg-transparent text-primary-purple hover:text-primary-peach hover:underline',
+    outline: 'bg-transparent border border-current text-primary-purple hover:bg-primary-lavender hover:bg-opacity-10',
+    peach: 'bg-primary-peach text-white hover:bg-opacity-90 focus:ring-primary-lavender shadow-sm',
   };
   
   const sizeClasses = {

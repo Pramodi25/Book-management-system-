@@ -123,7 +123,7 @@ const AuthorForm = ({ initialData = {}, onSubmit, loading = false }) => {
           value={formData.biography || ''}
           onChange={handleChange}
           rows={4}
-          className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-200 focus:border-blue-500"
+          className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-200 focus:border-blue-500 bg-white text-gray-900"
         />
         {errors.biography && (
           <p className="mt-1 text-sm text-red-600">{errors.biography}</p>

@@ -63,7 +63,7 @@ const BooksPage = () => {
   return (
     <div>
       <div className="flex justify-between items-center mb-6">
-        <h1 className="text-2xl font-bold">Books</h1>
+        <h1 className="text-2xl font-bold text-black">Books</h1>
         <Button onClick={() => navigate('/books/new')}>Add New Book</Button>
       </div>
       

@@ -70,7 +70,7 @@ const PublishersPage = () => {
   
   return (
     <div>
-      <h1 className="text-2xl font-bold mb-6">Add New Publisher</h1>
+      <h1 className="text-2xl font-bold mb-6 text-black">Add New Publisher</h1>
       
       <Card>
         {successMessage && (

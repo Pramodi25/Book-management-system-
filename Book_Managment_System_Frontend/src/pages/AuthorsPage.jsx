@@ -70,7 +70,7 @@ const AuthorsPage = () => {
   
   return (
     <div>
-      <h1 className="text-2xl font-bold mb-6">Add New Author</h1>
+      <h1 className="text-2xl font-bold mb-6 text-black">Add New Author</h1>
       
       <Card>
         {successMessage && (

@@ -25,7 +25,7 @@ const BookDetailsPage = () => {
   
   return (
     <div>
-      <h1 className="text-2xl font-bold mb-6">Book Details</h1>
+      <h1 className="text-2xl font-bold mb-6 text-black">Book Details</h1>
       
       <BookDetails
         book={currentBook}

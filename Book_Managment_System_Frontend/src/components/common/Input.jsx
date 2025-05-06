@@ -64,7 +64,7 @@ const Input = ({
           required={required}
           onFocus={handleFocus}
           onBlur={handleBlur}
-          className={`w-full px-4 py-2.5 ${
+          className={`w-full px-4 py-2.5 bg-white ${
             icon && iconPosition === 'left' ? 'pl-10' : ''
           } ${
             icon && iconPosition === 'right' ? 'pr-10' : ''

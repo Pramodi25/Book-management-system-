@@ -25,6 +25,22 @@ export default {
       backgroundColor: {
         'gradient-peach-purple': 'linear-gradient(to right, #E99E75, #44426E)',
       },
+      animation: {
+        'fade-in': 'fadeIn 1s ease-in-out',
+        'bounce': 'bounce 1s infinite',
+        'pulse': 'pulse 2s cubic-bezier(0.4, 0, 0.6, 1) infinite',
+        'loading-progress': 'loading 2s ease-in-out infinite',
+      },
+      keyframes: {
+        fadeIn: {
+          '0%': { opacity: '0' },
+          '100%': { opacity: '1' },
+        },
+        loading: {
+          '0%': { width: '0%' },
+          '100%': { width: '100%' },
+        },
+      },
     },
   },
   plugins: [],

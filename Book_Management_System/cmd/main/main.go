@@ -1,18 +1,19 @@
 package main
 
 import (
+	"book_management_system/internal/config"
+	"book_management_system/internal/db"
+	"book_management_system/internal/handler"
+	"book_management_system/internal/service"
 	"database/sql"
 	"fmt"
 	"log"
 	"net/http"
 	"time"
 
-	"book_management_system/internal/config"
-	"book_management_system/internal/db"
-	"book_management_system/internal/handler"
-	"book_management_system/internal/service"
-
 	"github.com/go-chi/chi/v5"
+	"github.com/go-chi/chi/v5/middleware"
+	"github.com/go-chi/cors"
 	_ "github.com/lib/pq"
 )
 
@@ -46,9 +47,23 @@ func main() {
 	authorHandler := handler.NewAuthorHandler(authorService)
 	publisherService := service.NewPublisherService(queries)
 	publisherHandler := handler.NewPublisherHandler(publisherService)
-
 	// Router setup
 	r := chi.NewRouter()
+
+	// Add CORS middleware
+	r.Use(cors.Handler(cors.Options{
+		AllowedOrigins:   []string{"http://localhost:3000", "http://localhost:3001"},
+		AllowedMethods:   []string{"GET", "POST", "PUT", "DELETE", "OPTIONS"},
+		AllowedHeaders:   []string{"Accept", "Authorization", "Content-Type", "X-CSRF-Token"},
+		ExposedHeaders:   []string{"Link"},
+		AllowCredentials: true,
+		MaxAge:           300, // Maximum value not eagerly cleared by browsers
+	}))
+
+	// Add other middleware
+	r.Use(middleware.Logger)
+	r.Use(middleware.Recoverer)
+
 	r.Get("/status", handler.StatusHandler(conn))
 
 	r.Route("/books", func(r chi.Router) {

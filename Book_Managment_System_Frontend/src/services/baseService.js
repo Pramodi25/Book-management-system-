@@ -33,21 +33,15 @@ export default class BaseService {
     const response = await api.get(`${this.resourceUrl}/${id}`);
     return response.data;
   }
+
   /**
    * Create a new resource
    * @param {Object} data - Resource data
    * @returns {Promise<Object>} - Created resource
    */
   async create(data) {
-    console.log(`BaseService: POST ${this.resourceUrl}`, data);
-    try {
-      const response = await api.post(this.resourceUrl, data);
-      console.log(`BaseService: Response from ${this.resourceUrl}`, response.data);
-      return response.data;
-    } catch (error) {
-      console.error(`BaseService: Error in POST ${this.resourceUrl}`, error);
-      throw error;
-    }
+    const response = await api.post(this.resourceUrl, data);
+    return response.data;
   }
 
   /**

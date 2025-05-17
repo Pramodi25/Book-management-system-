@@ -126,26 +126,9 @@ export const usePublishers = (initialPage = 1, initialLimit = 10, fetchOnMount =
         }
       }
       
-      return newPublisher;    } catch (err) {
-      console.error('Error creating publisher:', err);
-      // Display detailed error information
-      let errorMsg = 'Failed to create publisher';
-      if (err.response) {
-        // The request was made and the server responded with a status code
-        // that falls out of the range of 2xx
-        console.error('Response data:', err.response.data);
-        console.error('Response status:', err.response.status);
-        errorMsg = err.response.data.error || err.response.data.message || 'Server error: ' + err.response.status;
-      } else if (err.request) {
-        // The request was made but no response was received
-        console.error('No response received:', err.request);
-        errorMsg = 'No response from server';
-      } else {
-        // Something happened in setting up the request that triggered an Error
-        console.error('Error message:', err.message);
-        errorMsg = err.message;
-      }
-      
+      return newPublisher;
+    } catch (err) {
+      const errorMsg = err.message || 'Failed to create publisher';
       setError(errorMsg);
       
       // Add error notification if actions exists

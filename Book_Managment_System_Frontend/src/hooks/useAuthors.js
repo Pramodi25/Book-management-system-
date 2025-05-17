@@ -125,26 +125,9 @@ export const useAuthors = (initialPage = 1, initialLimit = 10, fetchOnMount = tr
         }
       }
       
-      return newAuthor;    } catch (err) {
-      console.error('Error creating author:', err);
-      // Display detailed error information
-      let errorMsg = 'Failed to create author';
-      if (err.response) {
-        // The request was made and the server responded with a status code
-        // that falls out of the range of 2xx
-        console.error('Response data:', err.response.data);
-        console.error('Response status:', err.response.status);
-        errorMsg = err.response.data.error || err.response.data.message || 'Server error: ' + err.response.status;
-      } else if (err.request) {
-        // The request was made but no response was received
-        console.error('No response received:', err.request);
-        errorMsg = 'No response from server';
-      } else {
-        // Something happened in setting up the request that triggered an Error
-        console.error('Error message:', err.message);
-        errorMsg = err.message;
-      }
-      
+      return newAuthor;
+    } catch (err) {
+      const errorMsg = err.message || 'Failed to create author';
       setError(errorMsg);
       
       // Add error notification if actions exists

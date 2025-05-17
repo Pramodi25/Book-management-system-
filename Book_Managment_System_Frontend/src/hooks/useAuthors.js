@@ -93,8 +93,7 @@ export const useAuthors = (initialPage = 1, initialLimit = 10, fetchOnMount = tr
     } finally {
       setLoading(false);
     }
-  };
-  // Create new author
+  };  // Create new author
   const addAuthor = async (authorData) => {
     setLoading(true);
     setError(null);
@@ -105,11 +104,13 @@ export const useAuthors = (initialPage = 1, initialLimit = 10, fetchOnMount = tr
       // Transform frontend author data to match backend structure
       const backendAuthorData = {
         authorId: authorId,
-        name: `${authorData.firstName || ''} ${authorData.lastName || ''}`.trim(),
-        bio: authorData.biography || '',
+        name: `${authorData.firstName || ''} ${authorData.lastName || ''}`.trim() || authorData.name,
+        bio: authorData.biography || authorData.bio || '',
       };
       
+      console.log('Submitting author data to backend:', backendAuthorData);
       const newAuthor = await authorService.create(backendAuthorData);
+      console.log('Response from backend:', newAuthor);
       
       // Update global state if actions exists
       if (actions && actions.addAuthor) {
@@ -124,9 +125,26 @@ export const useAuthors = (initialPage = 1, initialLimit = 10, fetchOnMount = tr
         }
       }
       
-      return newAuthor;
-    } catch (err) {
-      const errorMsg = err.message || 'Failed to create author';
+      return newAuthor;    } catch (err) {
+      console.error('Error creating author:', err);
+      // Display detailed error information
+      let errorMsg = 'Failed to create author';
+      if (err.response) {
+        // The request was made and the server responded with a status code
+        // that falls out of the range of 2xx
+        console.error('Response data:', err.response.data);
+        console.error('Response status:', err.response.status);
+        errorMsg = err.response.data.error || err.response.data.message || 'Server error: ' + err.response.status;
+      } else if (err.request) {
+        // The request was made but no response was received
+        console.error('No response received:', err.request);
+        errorMsg = 'No response from server';
+      } else {
+        // Something happened in setting up the request that triggered an Error
+        console.error('Error message:', err.message);
+        errorMsg = err.message;
+      }
+      
       setError(errorMsg);
       
       // Add error notification if actions exists

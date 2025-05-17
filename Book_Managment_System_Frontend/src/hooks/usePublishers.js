@@ -93,8 +93,7 @@ export const usePublishers = (initialPage = 1, initialLimit = 10, fetchOnMount =
     } finally {
       setLoading(false);
     }
-  };
-  // Create new publisher
+  };  // Create new publisher
   const addPublisher = async (publisherData) => {
     setLoading(true);
     setError(null);
@@ -110,7 +109,9 @@ export const usePublishers = (initialPage = 1, initialLimit = 10, fetchOnMount =
         address: publisherData.location || publisherData.address || '',
       };
       
+      console.log('Submitting publisher data to backend:', backendPublisherData);
       const newPublisher = await publisherService.create(backendPublisherData);
+      console.log('Response from backend:', newPublisher);
       
       // Update global state if actions exists
       if (actions && actions.addPublisher) {
@@ -125,9 +126,26 @@ export const usePublishers = (initialPage = 1, initialLimit = 10, fetchOnMount =
         }
       }
       
-      return newPublisher;
-    } catch (err) {
-      const errorMsg = err.message || 'Failed to create publisher';
+      return newPublisher;    } catch (err) {
+      console.error('Error creating publisher:', err);
+      // Display detailed error information
+      let errorMsg = 'Failed to create publisher';
+      if (err.response) {
+        // The request was made and the server responded with a status code
+        // that falls out of the range of 2xx
+        console.error('Response data:', err.response.data);
+        console.error('Response status:', err.response.status);
+        errorMsg = err.response.data.error || err.response.data.message || 'Server error: ' + err.response.status;
+      } else if (err.request) {
+        // The request was made but no response was received
+        console.error('No response received:', err.request);
+        errorMsg = 'No response from server';
+      } else {
+        // Something happened in setting up the request that triggered an Error
+        console.error('Error message:', err.message);
+        errorMsg = err.message;
+      }
+      
       setError(errorMsg);
       
       // Add error notification if actions exists

@@ -94,17 +94,23 @@ export const usePublishers = (initialPage = 1, initialLimit = 10, fetchOnMount =
       setLoading(false);
     }
   };
-
   // Create new publisher
   const addPublisher = async (publisherData) => {
     setLoading(true);
     setError(null);
     try {
-      // Add UUID if not provided
-      if (!publisherData.publisherId) {
-        publisherData.publisherId = uuidv4();
-      }
-      const newPublisher = await publisherService.create(publisherData);
+      // Generate UUID if not provided
+      const publisherId = publisherData.publisherId || uuidv4();
+      
+      // Transform frontend publisher data to match backend structure
+      // Note: backend uses snake_case for publisherId
+      const backendPublisherData = {
+        publisher_id: publisherId,
+        name: publisherData.name || '',
+        address: publisherData.location || publisherData.address || '',
+      };
+      
+      const newPublisher = await publisherService.create(backendPublisherData);
       
       // Update global state if actions exists
       if (actions && actions.addPublisher) {

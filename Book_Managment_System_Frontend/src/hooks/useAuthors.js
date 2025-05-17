@@ -94,17 +94,22 @@ export const useAuthors = (initialPage = 1, initialLimit = 10, fetchOnMount = tr
       setLoading(false);
     }
   };
-
   // Create new author
   const addAuthor = async (authorData) => {
     setLoading(true);
     setError(null);
     try {
-      // Add UUID if not provided
-      if (!authorData.authorId) {
-        authorData.authorId = uuidv4();
-      }
-      const newAuthor = await authorService.create(authorData);
+      // Generate UUID if not provided
+      const authorId = authorData.authorId || uuidv4();
+      
+      // Transform frontend author data to match backend structure
+      const backendAuthorData = {
+        authorId: authorId,
+        name: `${authorData.firstName || ''} ${authorData.lastName || ''}`.trim(),
+        bio: authorData.biography || '',
+      };
+      
+      const newAuthor = await authorService.create(backendAuthorData);
       
       // Update global state if actions exists
       if (actions && actions.addAuthor) {

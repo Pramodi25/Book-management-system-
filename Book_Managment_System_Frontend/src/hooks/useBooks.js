@@ -89,13 +89,31 @@ export const useBooks = (initialPage = 1, initialLimit = 10, fetchOnMount = true
       setLoading(false);
     }
   };
-
   // Create new book
   const addBook = async (bookData) => {
     setLoading(true);
     setError(null);
     try {
-      const newBook = await bookService.create(bookData);
+      // Transform frontend bookData to match backend expectations
+      console.log('Original book data from form:', bookData);
+      
+      const backendBookData = {
+        bookId: bookData.bookId || null,
+        authorId: bookData.authorId,
+        publisherId: bookData.publisherId,
+        title: bookData.title || '',
+        publicationDate: bookData.publicationDate || '',
+        isbn: bookData.isbn || '',
+        pages: parseInt(bookData.pages) || 1,
+        genre: bookData.genre || '',
+        description: bookData.description || '',
+        price: parseFloat(bookData.price) || 0,
+        quantity: parseInt(bookData.quantity) || 0
+      };
+      
+      console.log('Transformed book data for backend:', backendBookData);
+      
+      const newBook = await bookService.create(backendBookData);
       
       // Update global state
       actions.addBook(newBook);
@@ -122,13 +140,31 @@ export const useBooks = (initialPage = 1, initialLimit = 10, fetchOnMount = true
       setLoading(false);
     }
   };
-
   // Update book
   const editBook = async (id, bookData) => {
     setLoading(true);
     setError(null);
     try {
-      const updatedBook = await bookService.update(id, bookData);
+      // Transform frontend bookData to match backend expectations
+      console.log('Original book data for update:', bookData);
+      
+      const backendBookData = {
+        bookId: id || bookData.bookId,
+        authorId: bookData.authorId,
+        publisherId: bookData.publisherId,
+        title: bookData.title || '',
+        publicationDate: bookData.publicationDate || '',
+        isbn: bookData.isbn || '',
+        pages: parseInt(bookData.pages) || 1,
+        genre: bookData.genre || '',
+        description: bookData.description || '',
+        price: parseFloat(bookData.price) || 0,
+        quantity: parseInt(bookData.quantity) || 0
+      };
+      
+      console.log('Transformed book data for backend update:', backendBookData);
+      
+      const updatedBook = await bookService.update(id, backendBookData);
       
       // Update global state
       actions.updateBook(updatedBook);

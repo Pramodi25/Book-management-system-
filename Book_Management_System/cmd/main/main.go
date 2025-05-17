@@ -49,10 +49,9 @@ func main() {
 	publisherHandler := handler.NewPublisherHandler(publisherService)
 	// Router setup
 	r := chi.NewRouter()
-
 	// Add CORS middleware
 	r.Use(cors.Handler(cors.Options{
-		AllowedOrigins:   []string{"http://localhost:3000", "http://localhost:3001"},
+		AllowedOrigins:   []string{"http://localhost:3000", "http://localhost:3001", "http://localhost:3002", "http://localhost:3003"},
 		AllowedMethods:   []string{"GET", "POST", "PUT", "DELETE", "OPTIONS"},
 		AllowedHeaders:   []string{"Accept", "Authorization", "Content-Type", "X-CSRF-Token"},
 		ExposedHeaders:   []string{"Link"},
@@ -65,7 +64,6 @@ func main() {
 	r.Use(middleware.Recoverer)
 
 	r.Get("/status", handler.StatusHandler(conn))
-
 	r.Route("/books", func(r chi.Router) {
 		r.Get("/", bookHandler.GetAll)
 		r.Post("/", bookHandler.Create)
@@ -75,8 +73,21 @@ func main() {
 		r.Get("/search", bookHandler.Search)
 	})
 
-	r.Post("/authors", authorHandler.Create)
-	r.Post("/publishers", publisherHandler.Create)
+	r.Route("/authors", func(r chi.Router) {
+		r.Get("/", authorHandler.GetAll)
+		r.Post("/", authorHandler.Create)
+		r.Get("/{id}", authorHandler.GetOne)
+		r.Put("/{id}", authorHandler.Update)
+		r.Delete("/{id}", authorHandler.Delete)
+	})
+
+	r.Route("/publishers", func(r chi.Router) {
+		r.Get("/", publisherHandler.GetAll)
+		r.Post("/", publisherHandler.Create)
+		r.Get("/{id}", publisherHandler.GetOne)
+		r.Put("/{id}", publisherHandler.Update)
+		r.Delete("/{id}", publisherHandler.Delete)
+	})
 
 	// Start server
 	port := config.AppConfig.Server.Port

@@ -29,8 +29,41 @@ const BookForm = ({ initialData, onSubmit, loading }) => {
   const [newAuthor, setNewAuthor] = useState({ name: '', bio: '' });
   const [newPublisher, setNewPublisher] = useState({ name: '', address: '' });
   
-  const { addAuthor, loading: authorLoading } = useAuthors();
-  const { addPublisher, loading: publisherLoading } = usePublishers();
+  const { addAuthor, fetchAuthors, loading: authorLoading } = useAuthors();
+  const { addPublisher, fetchPublishers, loading: publisherLoading } = usePublishers();
+  
+  // Fetch authors and publishers on component mount
+  useEffect(() => {
+    const loadData = async () => {
+      try {
+        // Fetch authors
+        const authorsData = await fetchAuthors();
+        if (authorsData && authorsData.authors) {
+          const authorOptions = authorsData.authors.map(author => ({
+            value: author.authorId,
+            label: author.name
+          }));
+          setAuthors(authorOptions);
+          console.log('Loaded authors:', authorOptions);
+        }
+        
+        // Fetch publishers
+        const publishersData = await fetchPublishers();
+        if (publishersData && publishersData.publishers) {
+          const publisherOptions = publishersData.publishers.map(publisher => ({
+            value: publisher.publisherId || publisher.publisher_id,
+            label: publisher.name
+          }));
+          setPublishers(publisherOptions);
+          console.log('Loaded publishers:', publisherOptions);
+        }
+      } catch (error) {
+        console.error('Failed to load form data:', error);
+      }
+    };
+    
+    loadData();
+  }, [fetchAuthors, fetchPublishers]);
   
   // Initialize form with data if editing
   useEffect(() => {

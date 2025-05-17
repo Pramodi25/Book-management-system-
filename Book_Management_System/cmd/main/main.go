@@ -59,11 +59,12 @@ func main() {
 		MaxAge:           300, // Maximum value not eagerly cleared by browsers
 	}))
 
-	// Add other middleware
-	r.Use(middleware.Logger)
+	// Add other middleware	r.Use(middleware.Logger)
 	r.Use(middleware.Recoverer)
 
 	r.Get("/status", handler.StatusHandler(conn))
+
+	// Book routes
 	r.Route("/books", func(r chi.Router) {
 		r.Get("/", bookHandler.GetAll)
 		r.Post("/", bookHandler.Create)
@@ -73,21 +74,11 @@ func main() {
 		r.Get("/search", bookHandler.Search)
 	})
 
-	r.Route("/authors", func(r chi.Router) {
-		r.Get("/", authorHandler.GetAll)
-		r.Post("/", authorHandler.Create)
-		r.Get("/{id}", authorHandler.GetOne)
-		r.Put("/{id}", authorHandler.Update)
-		r.Delete("/{id}", authorHandler.Delete)
-	})
+	// Author routes - only Create is implemented
+	r.Post("/authors", authorHandler.Create)
 
-	r.Route("/publishers", func(r chi.Router) {
-		r.Get("/", publisherHandler.GetAll)
-		r.Post("/", publisherHandler.Create)
-		r.Get("/{id}", publisherHandler.GetOne)
-		r.Put("/{id}", publisherHandler.Update)
-		r.Delete("/{id}", publisherHandler.Delete)
-	})
+	// Publisher routes - only Create is implemented
+	r.Post("/publishers", publisherHandler.Create)
 
 	// Start server
 	port := config.AppConfig.Server.Port

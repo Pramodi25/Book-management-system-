@@ -35,3 +35,16 @@ func (h *AuthorHandler) Create(w http.ResponseWriter, r *http.Request) {
 
 	writeJSON(w, http.StatusCreated, res)
 }
+
+func (h *AuthorHandler) GetAll(w http.ResponseWriter, r *http.Request) {
+	// Mock implementation to return empty authors array
+	authors := []model.AuthorResponse{}
+	
+	// Wrap in a response with page info
+	response := map[string]interface{}{
+		"authors": authors,
+		"total": 0,
+	}
+	
+	writeJSON(w, http.StatusOK, response)
+}

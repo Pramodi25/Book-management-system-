@@ -1,4 +1,4 @@
-main:
+﻿main:
   port: 8081
 
 database:

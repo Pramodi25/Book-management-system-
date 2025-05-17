@@ -35,3 +35,16 @@ func (h *PublisherHandler) Create(w http.ResponseWriter, r *http.Request) {
 
 	writeJSON(w, http.StatusCreated, res)
 }
+
+func (h *PublisherHandler) GetAll(w http.ResponseWriter, r *http.Request) {
+	// Mock implementation to return empty publishers array
+	publishers := []model.PublisherResponse{}
+
+	// Wrap in a response with page info
+	response := map[string]interface{}{
+		"publishers": publishers,
+		"total":      0,
+	}
+
+	writeJSON(w, http.StatusOK, response)
+}

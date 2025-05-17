@@ -63,7 +63,6 @@ func main() {
 	r.Use(middleware.Recoverer)
 
 	r.Get("/status", handler.StatusHandler(conn))
-
 	// Book routes
 	r.Route("/books", func(r chi.Router) {
 		r.Get("/", bookHandler.GetAll)
@@ -74,11 +73,17 @@ func main() {
 		r.Get("/search", bookHandler.Search)
 	})
 
-	// Author routes - only Create is implemented
-	r.Post("/authors", authorHandler.Create)
+	// Author routes
+	r.Route("/authors", func(r chi.Router) {
+		r.Get("/", authorHandler.GetAll)
+		r.Post("/", authorHandler.Create)
+	})
 
-	// Publisher routes - only Create is implemented
-	r.Post("/publishers", publisherHandler.Create)
+	// Publisher routes
+	r.Route("/publishers", func(r chi.Router) {
+		r.Get("/", publisherHandler.GetAll)
+		r.Post("/", publisherHandler.Create)
+	})
 
 	// Start server
 	port := config.AppConfig.Server.Port

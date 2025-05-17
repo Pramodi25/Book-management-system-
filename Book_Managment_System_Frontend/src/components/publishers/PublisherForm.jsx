@@ -2,6 +2,14 @@ import React, { useState, useEffect } from 'react';
 import PropTypes from 'prop-types';
 import Input from '../common/Input';
 import Button from '../common/Button';
+import { useAppContext } from '../../contexts/AppContext';
+import { 
+  required, 
+  minLength, 
+  isNumber, 
+  isUrl,
+  validateForm 
+} from '../../utils/validators';
 
 /**
  * PublisherForm component for creating and editing publishers
@@ -16,7 +24,24 @@ const PublisherForm = ({ initialData = {}, onSubmit, loading = false }) => {
     ...initialData,
   });
 
+  const [touched, setTouched] = useState({});
   const [errors, setErrors] = useState({});
+  const { actions } = useAppContext();
+
+  // Validation schema
+  const validationSchema = {
+    name: [
+      required('Publisher name is required'),
+      minLength(2, 'Publisher name must be at least 2 characters')
+    ],
+    website: isUrl('Please enter a valid URL'),
+    foundedYear: isNumber({
+      min: 1400,
+      max: new Date().getFullYear(),
+      integer: true,
+      message: `Founded year must be between 1400 and ${new Date().getFullYear()}`
+    })
+  };
 
   // Update form when initialData changes (edit mode)
   useEffect(() => {
@@ -25,54 +50,75 @@ const PublisherForm = ({ initialData = {}, onSubmit, loading = false }) => {
     }
   }, [initialData]);
 
+  // Validate on touched fields or all fields on submit
+  useEffect(() => {
+    const fieldsToValidate = Object.keys(touched).filter(key => touched[key]);
+    
+    if (fieldsToValidate.length > 0) {
+      const validationRules = {};
+      
+      fieldsToValidate.forEach(field => {
+        if (validationSchema[field]) {
+          validationRules[field] = validationSchema[field];
+        }
+      });
+      
+      const newErrors = validateForm(formData, validationRules);
+      setErrors(prev => ({ ...prev, ...newErrors }));
+    }
+  }, [formData, touched, validationSchema]);
+
   const handleChange = (e) => {
     const { name, value } = e.target;
     setFormData((prev) => ({ ...prev, [name]: value }));
     
-    // Clear error when field is edited
-    if (errors[name]) {
-      setErrors((prev) => ({ ...prev, [name]: '' }));
-    }
+    // Mark field as touched
+    setTouched(prev => ({ ...prev, [name]: true }));
   };
 
-  const validate = () => {
-    const newErrors = {};
+  const handleBlur = (e) => {
+    const { name } = e.target;
+    setTouched(prev => ({ ...prev, [name]: true }));
+  };
+
+  const validatePublisherForm = () => {
+    // Mark all fields as touched
+    const allTouched = Object.keys(validationSchema).reduce(
+      (acc, field) => ({ ...acc, [field]: true }), 
+      {}
+    );
+    setTouched(allTouched);
     
-    if (!formData.name.trim()) {
-      newErrors.name = 'Publisher name is required';
-    }
-    
-    if (formData.website && !isValidUrl(formData.website)) {
-      newErrors.website = 'Please enter a valid URL';
-    }
-    
-    if (formData.foundedYear) {
-      const year = parseInt(formData.foundedYear);
-      const currentYear = new Date().getFullYear();
-      
-      if (isNaN(year) || year < 1400 || year > currentYear) {
-        newErrors.foundedYear = `Founded year must be between 1400 and ${currentYear}`;
-      }
-    }
-    
+    // Validate all fields
+    const newErrors = validateForm(formData, validationSchema);
     setErrors(newErrors);
+    
     return Object.keys(newErrors).length === 0;
-  };
-
-  const isValidUrl = (string) => {
-    try {
-      new URL(string);
-      return true;
-    } catch (_) {
-      return false;
-    }
   };
 
   const handleSubmit = (e) => {
     e.preventDefault();
     
-    if (validate()) {
-      onSubmit(formData);
+    if (validatePublisherForm()) {
+      try {
+        onSubmit(formData);
+        
+        actions.addNotification({
+          type: 'success',
+          message: initialData.id ? 'Publisher updated successfully' : 'Publisher created successfully'
+        });
+      } catch (error) {
+        actions.addNotification({
+          type: 'error',
+          message: error.message || 'An error occurred while saving the publisher'
+        });
+      }
+    } else {
+      // Scroll to first error
+      const firstErrorField = document.querySelector('[data-error="true"]');
+      if (firstErrorField) {
+        firstErrorField.scrollIntoView({ behavior: 'smooth', block: 'center' });
+      }
     }
   };
 
@@ -83,7 +129,9 @@ const PublisherForm = ({ initialData = {}, onSubmit, loading = false }) => {
         label="Publisher Name"
         value={formData.name}
         onChange={handleChange}
+        onBlur={handleBlur}
         error={errors.name}
+        data-error={Boolean(errors.name)}
         required
       />
       
@@ -93,7 +141,9 @@ const PublisherForm = ({ initialData = {}, onSubmit, loading = false }) => {
           label="Location"
           value={formData.location || ''}
           onChange={handleChange}
+          onBlur={handleBlur}
           error={errors.location}
+          data-error={Boolean(errors.location)}
         />
         
         <Input
@@ -102,7 +152,9 @@ const PublisherForm = ({ initialData = {}, onSubmit, loading = false }) => {
           type="number"
           value={formData.foundedYear || ''}
           onChange={handleChange}
+          onBlur={handleBlur}
           error={errors.foundedYear}
+          data-error={Boolean(errors.foundedYear)}
         />
       </div>
       
@@ -112,7 +164,9 @@ const PublisherForm = ({ initialData = {}, onSubmit, loading = false }) => {
         type="url"
         value={formData.website || ''}
         onChange={handleChange}
+        onBlur={handleBlur}
         error={errors.website}
+        data-error={Boolean(errors.website)}
         placeholder="https://"
       />
       
@@ -128,6 +182,7 @@ const PublisherForm = ({ initialData = {}, onSubmit, loading = false }) => {
           name="description"
           value={formData.description || ''}
           onChange={handleChange}
+          onBlur={handleBlur}
           rows={4}
           className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-200 focus:border-blue-500"
         />

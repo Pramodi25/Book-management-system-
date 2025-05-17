@@ -3,6 +3,7 @@ import { RouterProvider } from 'react-router-dom';
 import AppRoutes from './routes';
 import './styles/global.css';
 import SplashScreen from './components/common/SplashScreen';
+import { AppProvider } from './contexts/AppContext';
 
 const App = () => {
   const [showSplash, setShowSplash] = useState(true);
@@ -24,7 +25,11 @@ const App = () => {
     return <SplashScreen onFinish={handleSplashFinish} />;
   }
 
-  return <RouterProvider router={AppRoutes} />;
+  return (
+    <AppProvider>
+      <RouterProvider router={AppRoutes} />
+    </AppProvider>
+  );
 };
 
 export default App;

@@ -1,29 +1,35 @@
 import { useState, useEffect } from 'react';
-import { getAllBooks, getBookById, createBook, updateBook, deleteBook, searchBooks } from '../api/booksApi';
+import { getBookById, createBook, updateBook, deleteBook, searchBooks } from '../api/booksApi';
+import { useAppContext } from '../contexts/AppContext';
 
-export const useBooks = (initialPage = 1, initialLimit = 10) => {
-  const [books, setBooks] = useState([]);
-  const [currentBook, setCurrentBook] = useState(null);
+export const useBooks = (initialPage = 1, initialLimit = 10, fetchOnMount = true) => {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
-  const [totalBooks, setTotalBooks] = useState(0);
-  const [page, setPage] = useState(initialPage);
-  const [limit, setLimit] = useState(initialLimit);
+  const [currentBook, setCurrentBook] = useState(null);
+  const { state, actions } = useAppContext();
+  
+  // Extract books state from global context
+  const books = state.books.data || [];
+  const totalBooks = state.books.totalBooks || 0;
+  const page = state.books.page || initialPage;
+  const limit = state.books.limit || initialLimit;
 
-  // Fetch all books
+  // Fetch all books using the global context
   const fetchBooks = async (page = 1, limit = 10) => {
     setLoading(true);
     setError(null);
+    
     try {
-      const response = await getAllBooks(page, limit);
-      setBooks(response.books || []);
-      setTotalBooks(response.total || 0);
-      setPage(page);
-      setLimit(limit);
+      await actions.fetchBooks(page, limit);
+      setLoading(false);
+      return { 
+        books: state.books.data, 
+        total: state.books.totalBooks 
+      };
     } catch (err) {
       setError(err.message || 'Failed to fetch books');
-    } finally {
       setLoading(false);
+      throw err;
     }
   };
 
@@ -31,13 +37,23 @@ export const useBooks = (initialPage = 1, initialLimit = 10) => {
   const fetchBookById = async (id) => {
     setLoading(true);
     setError(null);
+    
+    // First check if we have the book in our current state
+    const cachedBook = books.find(book => book.bookId === id);
+    if (cachedBook) {
+      setCurrentBook(cachedBook);
+      setLoading(false);
+      return cachedBook;
+    }
+    
     try {
       const book = await getBookById(id);
       setCurrentBook(book);
       return book;
     } catch (err) {
-      setError(err.message || 'Failed to fetch book');
-      return null;
+      const errorMsg = err.message || 'Failed to fetch book';
+      setError(errorMsg);
+      throw err;
     } finally {
       setLoading(false);
     }
@@ -49,10 +65,27 @@ export const useBooks = (initialPage = 1, initialLimit = 10) => {
     setError(null);
     try {
       const newBook = await createBook(bookData);
-      setBooks((prevBooks) => [...prevBooks, newBook]);
+      
+      // Update global state
+      actions.addBook(newBook);
+      
+      // Add success notification
+      actions.addNotification({
+        type: 'success',
+        message: 'Book created successfully'
+      });
+      
       return newBook;
     } catch (err) {
-      setError(err.message || 'Failed to create book');
+      const errorMsg = err.message || 'Failed to create book';
+      setError(errorMsg);
+      
+      // Add error notification
+      actions.addNotification({
+        type: 'error',
+        message: errorMsg
+      });
+      
       return null;
     } finally {
       setLoading(false);
@@ -65,12 +98,27 @@ export const useBooks = (initialPage = 1, initialLimit = 10) => {
     setError(null);
     try {
       const updatedBook = await updateBook(id, bookData);
-      setBooks((prevBooks) =>
-        prevBooks.map((book) => (book.bookId === id ? updatedBook : book))
-      );
+      
+      // Update global state
+      actions.updateBook(updatedBook);
+      
+      // Add success notification
+      actions.addNotification({
+        type: 'success',
+        message: 'Book updated successfully'
+      });
+      
       return updatedBook;
     } catch (err) {
-      setError(err.message || 'Failed to update book');
+      const errorMsg = err.message || 'Failed to update book';
+      setError(errorMsg);
+      
+      // Add error notification
+      actions.addNotification({
+        type: 'error',
+        message: errorMsg
+      });
+      
       return null;
     } finally {
       setLoading(false);
@@ -83,10 +131,27 @@ export const useBooks = (initialPage = 1, initialLimit = 10) => {
     setError(null);
     try {
       await deleteBook(id);
-      setBooks((prevBooks) => prevBooks.filter((book) => book.bookId !== id));
+      
+      // Update global state
+      actions.deleteBook(id);
+      
+      // Add success notification
+      actions.addNotification({
+        type: 'success',
+        message: 'Book deleted successfully'
+      });
+      
       return true;
     } catch (err) {
-      setError(err.message || 'Failed to delete book');
+      const errorMsg = err.message || 'Failed to delete book';
+      setError(errorMsg);
+      
+      // Add error notification
+      actions.addNotification({
+        type: 'error',
+        message: errorMsg
+      });
+      
       return false;
     } finally {
       setLoading(false);
@@ -99,23 +164,38 @@ export const useBooks = (initialPage = 1, initialLimit = 10) => {
     setError(null);
     try {
       const response = await searchBooks(query, page, limit);
-      setBooks(response.books || []);
-      setTotalBooks(response.total || 0);
-      setPage(page);
-      setLimit(limit);
+      
+      // We don't update the global state here because search results
+      // are temporary and don't replace the main book list
+      
       return response;
     } catch (err) {
-      setError(err.message || 'Failed to search books');
+      const errorMsg = err.message || 'Failed to search books';
+      setError(errorMsg);
+      
+      actions.addNotification({
+        type: 'error',
+        message: errorMsg
+      });
+      
       return null;
     } finally {
       setLoading(false);
     }
   };
 
-  // Load books on initial render
+  // Set page in global state
+  const setPage = (newPage, newLimit) => {
+    actions.setBooksPage(newPage, newLimit || limit);
+  };
+
+  // Load books on initial render if fetchOnMount is true
   useEffect(() => {
-    fetchBooks(initialPage, initialLimit);
-  }, [initialPage, initialLimit]);
+    if (fetchOnMount) {
+      fetchBooks(initialPage, initialLimit);
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [fetchOnMount, initialPage, initialLimit]);
 
   return {
     books,
@@ -131,7 +211,6 @@ export const useBooks = (initialPage = 1, initialLimit = 10) => {
     editBook,
     removeBook,
     searchForBooks,
-    setPage,
-    setLimit,
+    setPage
   };
 };

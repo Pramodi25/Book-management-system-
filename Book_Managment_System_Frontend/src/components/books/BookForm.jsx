@@ -5,6 +5,15 @@ import Select from '../common/Select';
 import Button from '../common/Button';
 import { useAuthors } from '../../hooks/useAuthors';
 import { usePublishers } from '../../hooks/usePublishers';
+import { useAppContext } from '../../contexts/AppContext';
+import { 
+  required, 
+  minLength, 
+  isNumber, 
+  isDate, 
+  isIsbn, 
+  validateForm 
+} from '../../utils/validators';
 
 const BookForm = ({ initialData, onSubmit, loading }) => {
   const [book, setBook] = useState({
@@ -21,6 +30,7 @@ const BookForm = ({ initialData, onSubmit, loading }) => {
     quantity: 0
   });
   
+  const [touched, setTouched] = useState({});
   const [errors, setErrors] = useState({});
   const [authors, setAuthors] = useState([]);
   const [publishers, setPublishers] = useState([]);
@@ -31,6 +41,43 @@ const BookForm = ({ initialData, onSubmit, loading }) => {
   
   const { addAuthor, loading: authorLoading } = useAuthors();
   const { addPublisher, loading: publisherLoading } = usePublishers();
+  const { actions } = useAppContext();
+  
+  // Validation schema
+  const validationSchema = {
+    title: [
+      required('Title is required'),
+      minLength(3, 'Title must be at least 3 characters')
+    ],
+    authorId: required('Author is required'),
+    publisherId: required('Publisher is required'),
+    publicationDate: [
+      required('Publication date is required'),
+      isDate({ 
+        max: new Date(), 
+        message: 'Publication date cannot be in the future' 
+      })
+    ],
+    isbn: [
+      required('ISBN is required'),
+      isIsbn()
+    ],
+    genre: required('Genre is required'),
+    pages: isNumber({ 
+      min: 1, 
+      integer: true, 
+      message: 'Pages must be a positive whole number' 
+    }),
+    price: isNumber({ 
+      min: 0, 
+      message: 'Price cannot be negative' 
+    }),
+    quantity: isNumber({ 
+      min: 0, 
+      integer: true, 
+      message: 'Quantity must be a non-negative whole number' 
+    })
+  };
   
   // Initialize form with data if editing
   useEffect(() => {
@@ -41,6 +88,23 @@ const BookForm = ({ initialData, onSubmit, loading }) => {
       setBook(prev => ({ ...prev, bookId: uuidv4() }));
     }
   }, [initialData]);
+    // Validate on touched fields or all fields on submit
+  useEffect(() => {
+    const fieldsToValidate = Object.keys(touched).filter(key => touched[key]);
+    
+    if (fieldsToValidate.length > 0) {
+      const validationRules = {};
+      
+      fieldsToValidate.forEach(field => {
+        if (validationSchema[field]) {
+          validationRules[field] = validationSchema[field];
+        }
+      });
+      
+      const newErrors = validateForm(book, validationRules);
+      setErrors(prev => ({ ...prev, ...newErrors }));
+    }
+  }, [book, touched, validationSchema]);
   
   // Handle input changes
   const handleChange = (e) => {
@@ -59,27 +123,29 @@ const BookForm = ({ initialData, onSubmit, loading }) => {
       [name]: parsedValue
     }));
     
-    // Clear errors for this field
-    if (errors[name]) {
-      setErrors(prev => ({ ...prev, [name]: null }));
-    }
+    // Mark field as touched
+    setTouched(prev => ({ ...prev, [name]: true }));
+  };
+  
+  // Handle field blur
+  const handleBlur = (e) => {
+    const { name } = e.target;
+    setTouched(prev => ({ ...prev, [name]: true }));
   };
   
   // Validate form
-  const validateForm = () => {
-    const newErrors = {};
+  const validateBookForm = () => {
+    // Mark all fields as touched
+    const allTouched = Object.keys(validationSchema).reduce(
+      (acc, field) => ({ ...acc, [field]: true }), 
+      {}
+    );
+    setTouched(allTouched);
     
-    if (!book.title.trim()) newErrors.title = 'Title is required';
-    if (!book.authorId) newErrors.authorId = 'Author is required';
-    if (!book.publisherId) newErrors.publisherId = 'Publisher is required';
-    if (!book.publicationDate) newErrors.publicationDate = 'Publication date is required';
-    if (!book.isbn.trim()) newErrors.isbn = 'ISBN is required';
-    if (!book.genre.trim()) newErrors.genre = 'Genre is required';
-    if (book.pages <= 0) newErrors.pages = 'Pages must be greater than 0';
-    if (book.price < 0) newErrors.price = 'Price cannot be negative';
-    if (book.quantity < 0) newErrors.quantity = 'Quantity cannot be negative';
-    
+    // Validate all fields
+    const newErrors = validateForm(book, validationSchema);
     setErrors(newErrors);
+    
     return Object.keys(newErrors).length === 0;
   };
   
@@ -87,8 +153,27 @@ const BookForm = ({ initialData, onSubmit, loading }) => {
   const handleSubmit = async (e) => {
     e.preventDefault();
     
-    if (validateForm()) {
-      onSubmit(book);
+    if (validateBookForm()) {
+      try {
+        const result = await onSubmit(book);
+        if (result) {
+          actions.addNotification({
+            type: 'success',
+            message: initialData ? 'Book updated successfully' : 'Book created successfully'
+          });
+        }
+      } catch (error) {
+        actions.addNotification({
+          type: 'error',
+          message: error.message || 'An error occurred while saving the book'
+        });
+      }
+    } else {
+      // Scroll to first error
+      const firstErrorField = document.querySelector('[data-error="true"]');
+      if (firstErrorField) {
+        firstErrorField.scrollIntoView({ behavior: 'smooth', block: 'center' });
+      }
     }
   };
   
@@ -115,9 +200,18 @@ const BookForm = ({ initialData, onSubmit, loading }) => {
         setBook(prev => ({ ...prev, authorId: createdAuthor.authorId }));
         setShowAuthorForm(false);
         setNewAuthor({ name: '', bio: '' });
+        
+        actions.addNotification({
+          type: 'success',
+          message: 'Author created successfully'
+        });
       }
     } catch (error) {
       console.error('Failed to create author:', error);
+      actions.addNotification({
+        type: 'error',
+        message: 'Failed to create author'
+      });
     }
   };
   
@@ -149,8 +243,7 @@ const BookForm = ({ initialData, onSubmit, loading }) => {
       console.error('Failed to create publisher:', error);
     }
   };
-  
-  return (
+    return (
     <form onSubmit={handleSubmit} className="space-y-6">
       <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
         <Input
@@ -158,7 +251,9 @@ const BookForm = ({ initialData, onSubmit, loading }) => {
           name="title"
           value={book.title}
           onChange={handleChange}
+          onBlur={handleBlur}
           error={errors.title}
+          data-error={Boolean(errors.title)}
           required
         />
         
@@ -168,9 +263,11 @@ const BookForm = ({ initialData, onSubmit, loading }) => {
             name="authorId"
             value={book.authorId}
             onChange={handleChange}
+            onBlur={handleBlur}
             options={authors}
             placeholder="Select an author"
             error={errors.authorId}
+            data-error={Boolean(errors.authorId)}
             required
           />
           {!showAuthorForm ? (

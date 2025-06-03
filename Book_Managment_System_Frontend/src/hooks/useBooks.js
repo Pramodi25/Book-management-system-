@@ -3,10 +3,13 @@ import { bookService } from '../services';
 import { useAppContext } from '../contexts/AppContext';
 
 export const useBooks = (initialPage = 1, initialLimit = 10, fetchOnMount = true) => {
+  console.log('useBooks hook initialized');
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
   const [currentBook, setCurrentBook] = useState(null);
   const { state, actions } = useAppContext();
+  
+  console.log('AppContext state:', state);
   
   // Extract books state from global context
   const books = state.books.data || [];

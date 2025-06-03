@@ -1,30 +1,19 @@
-import React, { useState, useEffect } from 'react';
-import { RouterProvider } from 'react-router-dom';
-import AppRoutes from './routes';
+import React from 'react';
+import TestPage from './pages/TestPage';
 import './styles/global.css';
-import SplashScreen from './components/common/SplashScreen';
+
+console.log('App.jsx loaded - direct render');
 
 const App = () => {
-  const [showSplash, setShowSplash] = useState(true);
-
-  const handleSplashFinish = () => {
-    setShowSplash(false);
-  };
-
-  // Prevent scrolling when splash screen is shown
-  useEffect(() => {
-    if (showSplash) {
-      document.body.style.overflow = 'hidden';
-    } else {
-      document.body.style.overflow = 'auto';
-    }
-  }, [showSplash]);
-
-  if (showSplash) {
-    return <SplashScreen onFinish={handleSplashFinish} />;
-  }
-
-  return <RouterProvider router={AppRoutes} />;
+  console.log('App component rendering - direct render');
+  
+  // Directly render the TestPage component without any routing
+  return (
+    <div className="p-8">
+      <h1 className="text-3xl font-bold mb-4 text-blue-800">Book Management System</h1>
+      <TestPage />
+    </div>
+  );
 };
 
 export default App;

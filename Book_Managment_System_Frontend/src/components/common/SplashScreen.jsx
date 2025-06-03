@@ -1,12 +1,8 @@
 import React, { useEffect } from 'react';
 
-const SplashScreen = ({ onFinish, duration = 2000 }) => {
-  console.log('SplashScreen rendering, will finish in', duration, 'ms');
-  
+const SplashScreen = ({ onFinish, duration = 4000 }) => {
   useEffect(() => {
-    console.log('SplashScreen useEffect triggered');
     const timer = setTimeout(() => {
-      console.log('SplashScreen timeout triggered, calling onFinish');
       onFinish();
     }, duration);
 

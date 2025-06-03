@@ -8,16 +8,11 @@ import BookDetailsPage from './pages/BookDetailsPage';
 import BookEditPage from './pages/BookEditPage';
 import AuthorsPage from './pages/AuthorsPage';
 import PublishersPage from './pages/PublishersPage';
-import TestPage from './pages/TestPage';
 
 // Layout
 import MainLayout from './components/layout/MainLayout';
 
 const AppRoutes = createBrowserRouter([
-  {
-    path: '/test',
-    element: <TestPage />
-  },
   {
     path: '/',
     element: (

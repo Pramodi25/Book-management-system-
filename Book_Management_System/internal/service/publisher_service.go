@@ -33,13 +33,13 @@ func (s *PublisherService) CreatePublisher(ctx context.Context, req model.Publis
 	if err != nil {
 		return nil, err
 	}
-	
+
 	// Create the response
 	res := model.PublisherResponseFromDB(&publisher)
-	
+
 	// Store in our temporary cache
 	s.publishers = append(s.publishers, res)
-	
+
 	return res, nil
 }
 

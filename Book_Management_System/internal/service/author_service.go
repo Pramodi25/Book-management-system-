@@ -33,13 +33,13 @@ func (s *AuthorService) CreateAuthor(ctx context.Context, req model.AuthorReques
 	if err != nil {
 		return nil, err
 	}
-	
+
 	// Create the response
 	res := model.AuthorResponseFromDB(&author)
-	
+
 	// Store in our temporary cache
 	s.authors = append(s.authors, res)
-	
+
 	return res, nil
 }
 

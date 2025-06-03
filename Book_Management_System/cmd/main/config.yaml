@@ -1,0 +1,10 @@
+﻿main:
+  port: 8081
+
+database:
+  host: localhost
+  port: 5432
+  user: myuser
+  password: 1234567
+  dbname: mydatabase
+  sslmode: disable

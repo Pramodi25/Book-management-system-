@@ -7,4 +7,5 @@ import (
 
 type PublisherService interface {
 	CreatePublisher(ctx context.Context, req model.PublisherRequest) (*model.PublisherResponse, error)
+	GetAllPublishers(ctx context.Context) ([]*model.PublisherResponse, error)
 }

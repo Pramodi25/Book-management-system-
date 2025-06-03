@@ -37,13 +37,17 @@ func (h *AuthorHandler) Create(w http.ResponseWriter, r *http.Request) {
 }
 
 func (h *AuthorHandler) GetAll(w http.ResponseWriter, r *http.Request) {
-	// Mock implementation to return empty authors array
-	authors := []model.AuthorResponse{}
+	// Get all authors from the database
+	res, err := h.svc.GetAllAuthors(r.Context())
+	if err != nil {
+		writeError(w, http.StatusInternalServerError, "Error fetching authors: "+err.Error())
+		return
+	}
 
 	// Wrap in a response with page info
 	response := map[string]interface{}{
-		"authors": authors,
-		"total":   0,
+		"authors": res,
+		"total":   len(res),
 	}
 
 	writeJSON(w, http.StatusOK, response)

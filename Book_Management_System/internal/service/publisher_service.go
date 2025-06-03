@@ -13,11 +13,14 @@ type PublisherDBServiceProvider interface {
 
 type PublisherService struct {
 	q PublisherDBServiceProvider
+	// This is a temporary in-memory store for publishers since we don't have a ListPublishers query yet
+	publishers []*model.PublisherResponse
 }
 
 func NewPublisherService(publisherDBServiceProvider PublisherDBServiceProvider) *PublisherService {
 	return &PublisherService{
-		q: publisherDBServiceProvider,
+		q:          publisherDBServiceProvider,
+		publishers: make([]*model.PublisherResponse, 0),
 	}
 }
 
@@ -30,7 +33,19 @@ func (s *PublisherService) CreatePublisher(ctx context.Context, req model.Publis
 	if err != nil {
 		return nil, err
 	}
-	return model.PublisherResponseFromDB(&publisher), nil
+	
+	// Create the response
+	res := model.PublisherResponseFromDB(&publisher)
+	
+	// Store in our temporary cache
+	s.publishers = append(s.publishers, res)
+	
+	return res, nil
+}
+
+func (s *PublisherService) GetAllPublishers(ctx context.Context) ([]*model.PublisherResponse, error) {
+	// Return our cached publishers
+	return s.publishers, nil
 }
 
 func toCreatePublisherParams(req model.PublisherRequest) (db.CreatePublisherParams, error) {

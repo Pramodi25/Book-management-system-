@@ -7,4 +7,5 @@ import (
 
 type AuthorService interface {
 	CreateAuthor(ctx context.Context, req model.AuthorRequest) (*model.AuthorResponse, error)
+	GetAllAuthors(ctx context.Context) ([]*model.AuthorResponse, error)
 }

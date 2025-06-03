@@ -13,11 +13,14 @@ type AuthorDBServiceProvider interface {
 
 type AuthorService struct {
 	q AuthorDBServiceProvider
+	// This is a temporary in-memory store for authors since we don't have a ListAuthors query yet
+	authors []*model.AuthorResponse
 }
 
 func NewAuthorService(authorDBServiceProvider AuthorDBServiceProvider) *AuthorService {
 	return &AuthorService{
-		q: authorDBServiceProvider,
+		q:       authorDBServiceProvider,
+		authors: make([]*model.AuthorResponse, 0),
 	}
 }
 
@@ -30,7 +33,19 @@ func (s *AuthorService) CreateAuthor(ctx context.Context, req model.AuthorReques
 	if err != nil {
 		return nil, err
 	}
-	return model.AuthorResponseFromDB(&author), nil
+	
+	// Create the response
+	res := model.AuthorResponseFromDB(&author)
+	
+	// Store in our temporary cache
+	s.authors = append(s.authors, res)
+	
+	return res, nil
+}
+
+func (s *AuthorService) GetAllAuthors(ctx context.Context) ([]*model.AuthorResponse, error) {
+	// Return our cached authors
+	return s.authors, nil
 }
 
 func toCreateAuthorParams(req model.AuthorRequest) (db.CreateAuthorParams, error) {

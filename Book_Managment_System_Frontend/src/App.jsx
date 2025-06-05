@@ -6,11 +6,8 @@ import SplashScreen from './components/common/SplashScreen';
 
 const App = () => {
   const [showSplash, setShowSplash] = useState(true);
-  
-  console.log('App component rendering, showSplash:', showSplash);
 
   const handleSplashFinish = () => {
-    console.log('Splash screen finished, transitioning to main app');
     setShowSplash(false);
   };
 

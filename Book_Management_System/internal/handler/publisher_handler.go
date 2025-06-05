@@ -37,17 +37,13 @@ func (h *PublisherHandler) Create(w http.ResponseWriter, r *http.Request) {
 }
 
 func (h *PublisherHandler) GetAll(w http.ResponseWriter, r *http.Request) {
-	// Get all publishers from the database
-	res, err := h.svc.GetAllPublishers(r.Context())
-	if err != nil {
-		writeError(w, http.StatusInternalServerError, "Error fetching publishers: "+err.Error())
-		return
-	}
+	// Mock implementation to return empty publishers array
+	publishers := []model.PublisherResponse{}
 
 	// Wrap in a response with page info
 	response := map[string]interface{}{
-		"publishers": res,
-		"total":      len(res),
+		"publishers": publishers,
+		"total":      0,
 	}
 
 	writeJSON(w, http.StatusOK, response)

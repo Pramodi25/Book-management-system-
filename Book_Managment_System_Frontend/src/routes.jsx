@@ -12,8 +12,7 @@ import PublishersPage from './pages/PublishersPage';
 // Layout
 import MainLayout from './components/layout/MainLayout';
 
-const AppRoutes = createBrowserRouter(
-  [
+const AppRoutes = createBrowserRouter([
   {
     path: '/',
     element: (
@@ -27,6 +26,14 @@ const AppRoutes = createBrowserRouter(
     element: (
       <MainLayout>
         <BooksPage />
+      </MainLayout>
+    )
+  },
+  {
+    path: '/books/new',
+    element: (
+      <MainLayout>
+        <BookEditPage />
       </MainLayout>
     )
   },
@@ -61,9 +68,21 @@ const AppRoutes = createBrowserRouter(
         <PublishersPage />
       </MainLayout>
     )
+  },
+  {
+    path: '*',
+    element: (
+      <MainLayout>
+        <div className="text-center py-20">
+          <h1 className="text-3xl font-bold text-gray-800">404 - Page Not Found</h1>
+          <p className="text-gray-600 mt-4">The page you're looking for doesn't exist.</p>
+          <a href="/" className="mt-6 inline-block text-primary-purple hover:text-primary-peach">
+            Go back to Dashboard
+          </a>
+        </div>
+      </MainLayout>
+    )
   }
-], {
-  basename: '/' // Add this for proper routing in production
-});
+]);
 
 export default AppRoutes;

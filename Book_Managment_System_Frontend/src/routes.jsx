@@ -12,7 +12,8 @@ import PublishersPage from './pages/PublishersPage';
 // Layout
 import MainLayout from './components/layout/MainLayout';
 
-const AppRoutes = createBrowserRouter([
+const AppRoutes = createBrowserRouter(
+  [
   {
     path: '/',
     element: (
@@ -61,6 +62,8 @@ const AppRoutes = createBrowserRouter([
       </MainLayout>
     )
   }
-]);
+], {
+  basename: '/' // Add this for proper routing in production
+});
 
 export default AppRoutes;
